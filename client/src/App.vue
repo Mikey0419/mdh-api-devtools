@@ -7,7 +7,7 @@ const nav = [
 
 <template>
   <div class="min-h-screen">
-    <header class="sticky top-0 z-50 border-b border-white/10 bg-[#07111f]/85 backdrop-blur-xl">
+    <header class="sticky top-0 z-50 border-b border-cyan-300/15 bg-[#07111f]/90 backdrop-blur-xl">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
         <RouterLink to="/" class="flex items-center gap-3" aria-label="MDH-API home">
           <div>
@@ -26,7 +26,7 @@ const nav = [
           </div>
         </RouterLink>
         <nav class="hidden items-center gap-1 md:flex">
-          <RouterLink v-for="[label,path] in nav" :key="path" :to="path" class="rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-white" active-class="!bg-white/10 !text-white">{{ label }}</RouterLink>
+          <RouterLink v-for="[label,path] in nav" :key="path" :to="path" class="rounded-sm border border-transparent px-3 py-2 text-sm text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white" active-class="!border-cyan-300/20 !bg-cyan-300/[.06] !text-white">{{ label }}</RouterLink>
         </nav>
         <a href="https://github.com" target="_blank" class="btn-secondary !px-3">GitHub</a>
       </div>

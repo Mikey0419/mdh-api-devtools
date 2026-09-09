@@ -24,7 +24,7 @@ async function send(){ loading.value=true; response.value=null; try { const r=aw
     <div class="mt-6"><h3 class="mb-2 font-semibold">Body</h3><textarea v-model="body" class="input mono min-h-40" placeholder='{"name":"Mike"}'></textarea></div>
   </div>
   <div class="mt-6 grid gap-6 lg:grid-cols-2">
-    <div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h2 class="font-bold">Generated request</h2><div class="flex gap-1"><button v-for="t in ['curl','fetch','python']" :key="t" @click="tab=t" :class="['rounded-lg px-2.5 py-1 text-xs',tab===t?'bg-white/10 text-white':'text-slate-500']">{{t}}</button></div></div><CodeBlock :code="generated" /></div>
+    <div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h2 class="font-bold">Generated request</h2><div class="flex gap-1"><button v-for="t in ['curl','fetch','python']" :key="t" @click="tab=t" :class="['rounded-sm border border-transparent px-2.5 py-1 text-xs',tab===t?'border-cyan-300/20 bg-cyan-300/[.06] text-white':'text-slate-500']">{{t}}</button></div></div><CodeBlock :code="generated" /></div>
     <div class="panel p-5"><h2 class="mb-4 font-bold">Response</h2><div v-if="!response" class="grid min-h-56 place-items-center text-sm text-slate-500">Send a request to inspect the response.</div><div v-else><div class="mb-3 flex gap-2"><span class="badge">{{response.status || 'Error'}}</span><span v-if="response.durationMs" class="badge">{{response.durationMs}} ms</span></div><CodeBlock :code="JSON.stringify(response.body ?? response,null,2)" /></div></div>
   </div>
 </section>
