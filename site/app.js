@@ -10,6 +10,17 @@ const copyButton = document.querySelector("#copy-response");
 const sendButton = document.querySelector(".send-button");
 const toolTabs = [...document.querySelectorAll(".tool-tabs button")];
 const deliveryNote = document.querySelector("#delivery-note");
+const requestFields = document.querySelector("#request-fields");
+const websocketControls = document.querySelector("#websocket-controls");
+const websocketMessage = document.querySelector("#websocket-message");
+const websocketSend = document.querySelector("#websocket-send");
+const websocketDisconnect = document.querySelector("#websocket-disconnect");
+const websocketClear = document.querySelector("#websocket-clear");
+const websocketState = document.querySelector("#websocket-state");
+const websocketDot = document.querySelector("#websocket-dot");
+const websocketEventCount = document.querySelector("#websocket-event-count");
+let activeSocket = null;
+let websocketLog = [];
 
 const importPanel = document.querySelector("#import-panel");
 const importInput = document.querySelector("#import-input");
@@ -37,6 +48,7 @@ nav.addEventListener("click", () => {
 });
 
 function selectTool(name) {
+  if (activeSocket && name !== "WebSocket") disconnectWebSocket("Tool changed");
   toolTabs.forEach((tab) => {
     const active = tab.dataset.tool === name;
     tab.classList.toggle("active", active);
@@ -46,7 +58,7 @@ function selectTool(name) {
   const configurations = {
     HTTP: { method: "GET", endpoint: "https://jsonplaceholder.typicode.com/todos/1", button: "Send" },
     Webhook: { method: "POST", endpoint: "https://httpbin.org/post", button: "Deliver" },
-    WebSocket: { method: "GET", endpoint: "wss://echo.websocket.org", button: "Connect" }
+    WebSocket: { method: "GET", endpoint: "wss://ws.postman-echo.com/raw", button: "Connect" }
   };
   const next = configurations[name];
   methodSelect.value = next.method;
@@ -55,6 +67,9 @@ function selectTool(name) {
   bodyInput.value = name === "Webhook" ? '{\n  "event": "message.created",\n  "data": { "id": "evt_001" }\n}' : "";
   responseOutput.textContent = name === "WebSocket" ? "// Connection events will appear here." : "// Response body will appear here.";
   deliveryNote.hidden = name !== "Webhook";
+  requestFields.hidden = name === "WebSocket";
+  importPanel.hidden = name === "WebSocket";
+  websocketControls.hidden = name !== "WebSocket";
   statusCode.textContent = "READY";
   responseTime.textContent = "— ms";
   copyButton.disabled = true;
@@ -115,11 +130,48 @@ function renderProxyResult(result, prefixLines = []) {
   responseTime.textContent = `${result.durationMs} ms`;
 }
 
-function runWebSocket(url) {
+function setWebSocketState(label, state) {
+  websocketState.textContent = label;
+  websocketDot.dataset.state = state;
+  const connected = state === "open";
+  websocketSend.disabled = !connected;
+  websocketDisconnect.disabled = !activeSocket || activeSocket.readyState > WebSocket.OPEN;
+}
+
+function appendWebSocketEvent(direction, data, detail = {}) {
+  websocketLog.push({
+    time: new Date().toLocaleTimeString(),
+    direction,
+    data,
+    ...detail
+  });
+  websocketLog = websocketLog.slice(-100);
+  responseOutput.textContent = websocketLog.map((entry) => {
+    const marker = { connected: "●", sent: "→", received: "←", closed: "○", error: "!" }[entry.direction] || "·";
+    const meta = entry.code ? ` (${entry.code}${entry.reason ? `: ${entry.reason}` : ""})` : "";
+    return `[${entry.time}] ${marker} ${entry.direction.toUpperCase()}${meta}\n${entry.data || ""}`;
+  }).join("\n\n");
+  websocketEventCount.textContent = `${websocketLog.length} event${websocketLog.length === 1 ? "" : "s"}`;
+  responseOutput.scrollTop = responseOutput.scrollHeight;
+  copyButton.disabled = false;
+}
+
+function disconnectWebSocket(reason = "User disconnected") {
+  if (!activeSocket) return;
+  if (activeSocket.readyState === WebSocket.CONNECTING || activeSocket.readyState === WebSocket.OPEN) {
+    activeSocket.close(1000, reason);
+  }
+}
+
+function connectWebSocket(url) {
   return new Promise((resolve, reject) => {
     let settled = false;
     const socket = new WebSocket(url);
+    activeSocket = socket;
     const started = performance.now();
+    websocketLog = [];
+    websocketEventCount.textContent = "0 events";
+    setWebSocketState("Connecting…", "connecting");
     const timeout = setTimeout(() => {
       if (!settled) {
         settled = true;
@@ -133,17 +185,63 @@ function runWebSocket(url) {
       settled = true;
       clearTimeout(timeout);
       const elapsed = Math.round(performance.now() - started);
-      socket.close();
-      resolve({ elapsed, payload: { event: "open", url, protocol: socket.protocol || null } });
+      setWebSocketState("Connected", "open");
+      appendWebSocketEvent("connected", url, { protocol: socket.protocol || undefined });
+      resolve({ elapsed });
+    });
+    socket.addEventListener("message", async (event) => {
+      let data = event.data;
+      if (data instanceof Blob) data = await data.text();
+      appendWebSocketEvent("received", String(data));
+    });
+    socket.addEventListener("close", (event) => {
+      clearTimeout(timeout);
+      const isCurrentSocket = activeSocket === socket;
+      if (isCurrentSocket) {
+        activeSocket = null;
+        setWebSocketState("Disconnected", "closed");
+        statusCode.textContent = "CLOSED";
+      }
+      appendWebSocketEvent("closed", "Connection closed", { code: event.code, reason: event.reason });
+      if (!settled) {
+        settled = true;
+        reject(new Error(`The WebSocket closed before connecting (code ${event.code}).`));
+      }
     });
     socket.addEventListener("error", () => {
-      if (settled) return;
-      settled = true;
       clearTimeout(timeout);
-      reject(new Error("The WebSocket connection could not be opened."));
+      appendWebSocketEvent("error", "The WebSocket reported a connection error.");
+      if (!settled) {
+        settled = true;
+        reject(new Error("The WebSocket connection could not be opened."));
+      }
     });
   });
 }
+
+websocketSend.addEventListener("click", () => {
+  if (!activeSocket || activeSocket.readyState !== WebSocket.OPEN) return;
+  const message = websocketMessage.value;
+  activeSocket.send(message);
+  appendWebSocketEvent("sent", message);
+  websocketMessage.select();
+});
+
+websocketMessage.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    websocketSend.click();
+  }
+});
+
+websocketDisconnect.addEventListener("click", () => disconnectWebSocket());
+websocketClear.addEventListener("click", () => {
+  websocketLog = [];
+  websocketEventCount.textContent = "0 events";
+  responseOutput.textContent = "// Event log cleared. The connection remains active.";
+  copyButton.disabled = true;
+});
+window.addEventListener("pagehide", () => disconnectWebSocket("Page closed"));
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -156,8 +254,8 @@ form.addEventListener("submit", async (event) => {
     const tool = activeTool();
 
     if (tool === "WebSocket") {
-      const result = await runWebSocket(endpointInput.value);
-      responseOutput.textContent = JSON.stringify(result.payload, null, 2);
+      disconnectWebSocket("Reconnecting");
+      const result = await connectWebSocket(endpointInput.value);
       statusCode.textContent = "OPEN";
       responseTime.textContent = `${result.elapsed} ms`;
     } else if (tool === "Webhook") {

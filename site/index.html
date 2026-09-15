@@ -182,7 +182,7 @@
                 <input id="endpoint" type="url" value="https://jsonplaceholder.typicode.com/todos/1" required spellcheck="false" />
                 <button class="send-button" type="submit">Send <span aria-hidden="true">→</span></button>
               </div>
-              <div class="request-fields">
+              <div class="request-fields" id="request-fields">
                 <div><label for="headers">Headers</label><textarea id="headers" spellcheck="false" placeholder='{"Accept": "application/json"}'>{"Accept": "application/json"}</textarea></div>
                 <div><label for="body">Body</label><textarea id="body" spellcheck="false" placeholder='{"message": "hello"}'></textarea></div>
               </div>
@@ -191,6 +191,23 @@
                 destination never sees a browser request and CORS does not apply. HTTPS destinations only;
                 private and loopback addresses are refused.
               </p>
+              <div class="websocket-controls" id="websocket-controls" hidden>
+                <div class="websocket-state-row">
+                  <span class="websocket-dot" id="websocket-dot" aria-hidden="true"></span>
+                  <strong id="websocket-state" role="status">Disconnected</strong>
+                  <span id="websocket-event-count">0 events</span>
+                </div>
+                <label for="websocket-message">Message</label>
+                <div class="websocket-message-row">
+                  <input id="websocket-message" type="text" placeholder='{"type":"ping"}' spellcheck="false" />
+                  <button id="websocket-send" type="button" disabled>Send message <span aria-hidden="true">→</span></button>
+                </div>
+                <div class="websocket-actions">
+                  <button id="websocket-disconnect" type="button" disabled>Disconnect</button>
+                  <button id="websocket-clear" type="button">Clear event log</button>
+                  <small>Browser WebSockets do not support custom request headers.</small>
+                </div>
+              </div>
             </form>
           </div>
 
