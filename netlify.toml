@@ -1,0 +1,20 @@
+# Netlify configuration for MDH-API
+#
+# The static landing page in site/ is what gets published. The Vue app in
+# client/ and the Express server in server/ are the self-hosted build and are
+# not part of this deploy.
+
+[build]
+  publish = "site"
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"

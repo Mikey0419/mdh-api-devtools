@@ -67,7 +67,7 @@
       <section class="workspace" id="workspace" aria-labelledby="workspace-title">
         <div class="section-heading">
           <div><p class="section-index">01 / REQUEST LAB</p><h2 id="workspace-title">Send your first request</h2></div>
-          <p>Try the preloaded endpoint or replace it with any CORS-enabled API.</p>
+          <p>Try the preloaded endpoint or replace it with your own. Webhook deliveries are sent server-side, so CORS is not a factor.</p>
         </div>
 
         <div class="request-lab">
@@ -88,6 +88,11 @@
                 <div><label for="headers">Headers</label><textarea id="headers" spellcheck="false" placeholder='{"Accept": "application/json"}'>{"Accept": "application/json"}</textarea></div>
                 <div><label for="body">Body</label><textarea id="body" spellcheck="false" placeholder='{"message": "hello"}'></textarea></div>
               </div>
+              <p class="delivery-note" id="delivery-note" hidden>
+                <b>Sent server-side.</b> Webhook deliveries go out from a Netlify Function, so the
+                destination never sees a browser request and CORS does not apply. HTTPS destinations only;
+                private and loopback addresses are refused.
+              </p>
             </form>
           </div>
 
@@ -105,7 +110,7 @@
         </div>
         <div class="tool-grid">
           <article><span>HTTP</span><h3>Request Builder</h3><p>Compose methods, headers, and JSON bodies. Inspect the response without extra setup.</p><a href="#workspace">Build a request ↗</a></article>
-          <article><span>HOOK</span><h3>Webhook Tester</h3><p>Send sample events and inspect delivery behavior while you build an integration.</p><a href="#workspace" data-select-tool="Webhook">Test a payload ↗</a></article>
+          <article><span>HOOK</span><h3>Webhook Tester</h3><p>Deliver sample events server-side to any HTTPS endpoint, then inspect the exact status, headers, and body that came back.</p><a href="#workspace" data-select-tool="Webhook">Test a payload ↗</a></article>
           <article><span>WS</span><h3>WebSocket Client</h3><p>Open a live connection, send messages, and watch events arrive in real time.</p><a href="#workspace" data-select-tool="WebSocket">Open a socket ↗</a></article>
         </div>
       </section>
