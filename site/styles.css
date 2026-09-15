@@ -294,3 +294,91 @@ footer p:last-child { justify-self: end; }
   .auth-entry { min-height: 58svh; place-items: start center; padding-top: 3.5rem; }
   .auth-index { margin-bottom: 2rem; }
 }
+
+
+/* ------------------------------------------------------------------ account menu */
+.account-control { position: relative; }
+.account-chevron { margin-left: .15rem; color: var(--muted); transition: transform .16s ease; }
+.account-control.open .account-chevron,
+.account-control:hover .account-chevron,
+.account-control:focus-within .account-chevron { transform: rotate(180deg); }
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + .65rem);
+  right: 0;
+  width: 250px;
+  padding: .45rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #0b1714;
+  box-shadow: 0 18px 50px rgba(0,0,0,.38);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: opacity .15s ease,transform .15s ease,visibility .15s;
+}
+.account-dropdown::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -.7rem;
+  height: .7rem;
+}
+.account-control:hover .account-dropdown,
+.account-control:focus-within .account-dropdown,
+.account-control.open .account-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.account-summary { padding: .7rem .75rem .8rem; border-bottom: 1px solid var(--line); }
+.account-summary strong,.account-summary span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-summary strong { color: var(--paper); font-size: .88rem; }
+.account-summary span { margin-top: .25rem; color: var(--muted); font-size: .72rem; }
+.account-dropdown button {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 .75rem;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: .8rem;
+  font-weight: 650;
+}
+.account-dropdown button:hover,.account-dropdown button:focus-visible { background: rgba(71,240,174,.08); color: var(--paper); }
+#auth-logout { border-top: 1px solid var(--line); color: #ffb2a6; }
+.profile-dialog {
+  width: min(92vw,520px);
+  padding: 0;
+  border: 1px solid rgba(71,240,174,.28);
+  border-radius: 4px;
+  background: #0b1714;
+  color: var(--paper);
+  box-shadow: 0 28px 90px rgba(0,0,0,.62);
+}
+.profile-dialog::backdrop { background: rgba(2,7,6,.78); backdrop-filter: blur(5px); }
+.profile-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid var(--line); }
+.profile-dialog-head .auth-index { margin-bottom: .6rem; }
+.profile-dialog-head h2 { margin: 0; font-size: 1.75rem; letter-spacing: -.04em; }
+#profile-close { width: 38px; height: 38px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; font-size: 1.35rem; }
+#profile-close:hover { color: var(--paper); border-color: var(--paper); }
+.profile-avatar { width: 62px; height: 62px; display: grid; place-items: center; margin: 1.5rem; border: 1px solid rgba(71,240,174,.38); border-radius: 50%; background: rgba(71,240,174,.08); color: var(--acid); font-size: 1.4rem; font-weight: 850; }
+.profile-fields { margin: 0 1.5rem; border-top: 1px solid var(--line); }
+.profile-fields div { display: grid; grid-template-columns: 130px 1fr; gap: 1rem; padding: .9rem 0; border-bottom: 1px solid var(--line); }
+.profile-fields dt { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+.profile-fields dd { margin: 0; overflow-wrap: anywhere; font-size: .88rem; }
+.profile-note { margin: 1.25rem 1.5rem 1.5rem; color: var(--muted); font-size: .76rem; line-height: 1.55; }
+@media (max-width: 920px) {
+  .account-control { width: 100%; }
+  .account-dropdown { position: static; width: 100%; display: none; margin-top: .35rem; opacity: 1; visibility: visible; transform: none; box-shadow: none; }
+  .account-control.open .account-dropdown { display: block; }
+  .account-control:not(.open):hover .account-dropdown,
+  .account-control:not(.open):focus-within .account-dropdown { display: none; }
+}
