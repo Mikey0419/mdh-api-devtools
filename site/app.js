@@ -291,3 +291,64 @@ copyButton.addEventListener("click", async () => {
   copyButton.textContent = "Copied";
   setTimeout(() => { copyButton.textContent = original; }, 1400);
 });
+
+
+/* ------------------------------------------------------------------ Auth0 */
+const AUTH0_DOMAIN = "dev-k8fshtox4w7pm3ah.us.auth0.com";
+const AUTH0_CLIENT_ID = "QwA1u0OF6OVAjQvUs8CxusnaOTtIekq9";
+const authButton = document.querySelector("#auth-button");
+const authLabel = document.querySelector("#auth-label");
+let authClient;
+let signedIn = false;
+
+async function initializeAuth() {
+  try {
+    authClient = await auth0.createAuth0Client({
+      domain: AUTH0_DOMAIN,
+      clientId: AUTH0_CLIENT_ID,
+      authorizationParams: { redirect_uri: window.location.origin }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("error")) {
+      const message = params.get("error_description") || params.get("error");
+      history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      throw new Error(message);
+    }
+
+    if (params.has("code") && params.has("state")) {
+      const { appState } = await authClient.handleRedirectCallback();
+      history.replaceState({}, document.title, appState?.returnTo || window.location.pathname);
+    }
+
+    signedIn = await authClient.isAuthenticated();
+    if (signedIn) {
+      const user = await authClient.getUser();
+      authLabel.textContent = user?.name || user?.email || "Sign out";
+      authButton.title = "Sign out of MDH-API";
+      authButton.classList.add("signed-in");
+    } else {
+      authLabel.textContent = "Sign in";
+      authButton.title = "Sign in to MDH-API";
+    }
+    authButton.disabled = false;
+  } catch (error) {
+    console.error("Auth0 initialization failed:", error);
+    authLabel.textContent = "Sign in unavailable";
+    authButton.title = error.message;
+  }
+}
+
+authButton.addEventListener("click", async () => {
+  if (!authClient) return;
+  authButton.disabled = true;
+  if (signedIn) {
+    await authClient.logout({ logoutParams: { returnTo: window.location.origin } });
+    return;
+  }
+  await authClient.loginWithRedirect({
+    appState: { returnTo: window.location.pathname + window.location.hash }
+  });
+});
+
+initializeAuth();
