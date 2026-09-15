@@ -311,6 +311,47 @@ const profileDialog = document.querySelector("#profile-dialog");
 let authClient;
 let signedIn = false;
 let currentUser;
+let userSettings = { displayName: "", theme: "default", saveHistory: false };
+
+function settingsKey() {
+  return currentUser?.sub ? `mdh-api.settings.${currentUser.sub}` : null;
+}
+
+function historyKey() {
+  return currentUser?.sub ? `mdh-api.history.${currentUser.sub}` : null;
+}
+
+function applySettings() {
+  document.documentElement.dataset.theme = userSettings.theme || "default";
+  const name = userSettings.displayName.trim() || currentUser?.name || currentUser?.nickname || currentUser?.email || "Account";
+  authLabel.textContent = name;
+  accountName.textContent = name;
+}
+
+function loadSettings() {
+  const key = settingsKey();
+  if (!key) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || "{}");
+    userSettings = { ...userSettings, ...saved };
+  } catch {
+    localStorage.removeItem(key);
+  }
+  applySettings();
+}
+
+function recordRequest() {
+  if (!userSettings.saveHistory || !historyKey()) return;
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(historyKey()) || "[]"); } catch {}
+  history.unshift({
+    method: methodSelect.value,
+    endpoint: endpointInput.value,
+    tool: activeTool(),
+    createdAt: new Date().toISOString()
+  });
+  localStorage.setItem(historyKey(), JSON.stringify(history.slice(0, 25)));
+}
 
 function showLogin() {
   authLoading.hidden = true;
@@ -363,6 +404,7 @@ async function initializeAuth() {
       authButton.classList.add("signed-in");
       accountName.textContent = user?.name || user?.nickname || "MDH-API user";
       accountEmail.textContent = user?.email || "No email available";
+      loadSettings();
       showWorkspace();
     } else {
       authLabel.textContent = "Sign in";
@@ -401,11 +443,35 @@ document.querySelector("#profile-settings").addEventListener("click", () => {
   document.querySelector("#profile-name").textContent = currentUser.name || currentUser.nickname || "Not provided";
   document.querySelector("#profile-email").textContent = currentUser.email || "Not provided";
   document.querySelector("#profile-email-status").textContent = currentUser.email_verified ? "Verified" : "Not verified";
-  document.querySelector("#profile-avatar").textContent = (currentUser.name || currentUser.email || "U").trim().charAt(0).toUpperCase();
+  document.querySelector("#profile-avatar").textContent = (userSettings.displayName || currentUser.name || currentUser.email || "U").trim().charAt(0).toUpperCase();
+  document.querySelector("#display-name").value = userSettings.displayName;
+  document.querySelector("#interface-theme").value = userSettings.theme;
+  document.querySelector("#save-history").checked = userSettings.saveHistory;
+  document.querySelector("#settings-status").textContent = "";
   accountControl.classList.remove("open");
   authButton.setAttribute("aria-expanded", "false");
   profileDialog.showModal();
 });
+
+
+document.querySelector("#profile-settings-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  userSettings = {
+    displayName: document.querySelector("#display-name").value.trim(),
+    theme: document.querySelector("#interface-theme").value,
+    saveHistory: document.querySelector("#save-history").checked
+  };
+  localStorage.setItem(settingsKey(), JSON.stringify(userSettings));
+  applySettings();
+  document.querySelector("#settings-status").textContent = "Settings saved.";
+});
+
+document.querySelector("#clear-history").addEventListener("click", () => {
+  if (historyKey()) localStorage.removeItem(historyKey());
+  document.querySelector("#settings-status").textContent = "Request history cleared.";
+});
+
+form.addEventListener("submit", recordRequest);
 
 document.querySelector("#profile-close").addEventListener("click", () => profileDialog.close());
 profileDialog.addEventListener("click", (event) => {
