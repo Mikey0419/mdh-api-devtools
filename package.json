@@ -26,5 +26,8 @@
     "concurrently": "^9.2.1",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
