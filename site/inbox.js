@@ -30,7 +30,7 @@
   const responseStatus = root.querySelector("#inbox-response-status");
 
   const STORAGE_KEY = "mdh-api.inbox.endpoint";
-  const API_ORIGIN = "https://api.mdh-api.com";
+  const API_ORIGIN = "https://vps.mdh-api.com";
   const POLL_INTERVAL_MS = 15000;
   let serviceOrigin = API_ORIGIN;
 
