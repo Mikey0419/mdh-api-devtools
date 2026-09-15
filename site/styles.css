@@ -498,6 +498,20 @@ footer p:last-child { justify-self: end; }
 }
 
 /* ------------------------------------------------------------------ mobile polish */
+.system-monitor { margin-top: 1rem; border: 1px solid var(--line); background: linear-gradient(120deg,rgba(71,240,174,.055),transparent 55%),var(--panel); }
+.system-monitor > header { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.15rem; border-bottom: 1px solid var(--line); }
+.system-monitor header p { margin: 0 0 .3rem; color: var(--acid); font: .65rem ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing: .13em; }
+.system-monitor h2 { margin: 0; font-size: 1rem; }
+.system-connection { display: inline-flex; align-items: center; gap: .55rem; color: var(--muted); font: .72rem ui-monospace,SFMono-Regular,Menlo,monospace; }
+.system-connection i { width: 7px; height: 7px; border-radius: 50%; background: #d68b19; }
+.system-connection.live { color: var(--acid); }
+.system-connection.live i { background: var(--acid); box-shadow: 0 0 10px rgba(71,240,174,.65); }
+.system-metrics { display: grid; grid-template-columns: repeat(6,1fr); }
+.system-metrics > div { min-width: 0; padding: 1rem 1.15rem; border-right: 1px solid var(--line); }
+.system-metrics > div:last-child { border-right: 0; }
+.system-metrics span,.system-metrics strong { display: block; }
+.system-metrics span { color: var(--muted); font-size: .67rem; text-transform: uppercase; letter-spacing: .08em; }
+.system-metrics strong { margin-top: .45rem; color: var(--paper); font: 1rem ui-monospace,SFMono-Regular,Menlo,monospace; }
 @media (max-width: 920px) {
   nav { position: fixed; max-height: calc(100dvh - 76px); overflow-y: auto; padding: .75rem 1rem 1rem; background: rgba(11,23,20,.98); box-shadow: 0 24px 60px rgba(0,0,0,.42); }
   nav a { min-height: 48px; display: flex; align-items: center; padding: .75rem; border-bottom: 1px solid rgba(218,238,227,.09); }
@@ -583,4 +597,8 @@ footer p:last-child { justify-self: end; }
   .dashboard-panel > header { min-height: 76px; align-items: flex-start; padding: .9rem; }
   .dashboard-list li,.dashboard-collections li { padding-inline: .9rem; }
   .dashboard-list li time { display: none; }
+  .system-monitor > header { align-items: flex-start; padding: .9rem; }
+  .system-metrics { grid-template-columns: repeat(2,1fr); }
+  .system-metrics > div { padding: .85rem .9rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .system-metrics > div:nth-child(2n) { border-right: 0; }
 }

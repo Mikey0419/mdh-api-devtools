@@ -5,13 +5,36 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { createServer } from 'http'
 import WebSocket, { WebSocketServer } from 'ws'
+import os from 'os'
+import { statfsSync } from 'fs'
 
 const app=express(); const PORT=process.env.PORT||8002
 const hooks=new Map(), streams=new Map(), wsSessions=new Map(), wsStreams=new Map(), hookSockets=new Map()
+const systemSockets=new Set()
 app.use(cors())
 app.use(express.json({limit:'2mb'}))
 app.use(express.urlencoded({extended:true,limit:'2mb'}))
 app.use(express.text({type:['text/*','application/xml'],limit:'2mb'}))
+
+function systemSnapshot(){
+  const memoryTotal=os.totalmem(), memoryFree=os.freemem()
+  let disk=null
+  try{
+    const stats=statfsSync('/')
+    const total=stats.blocks*stats.bsize, free=stats.bavail*stats.bsize
+    disk={usedBytes:total-free,totalBytes:total,usedPercent:Math.round(((total-free)/total)*1000)/10}
+  }catch{}
+  return {
+    type:'system.status',status:'online',timestamp:new Date().toISOString(),
+    appUptimeSeconds:Math.floor(process.uptime()),systemUptimeSeconds:Math.floor(os.uptime()),
+    processMemoryBytes:process.memoryUsage().rss,
+    memory:{usedBytes:memoryTotal-memoryFree,totalBytes:memoryTotal,usedPercent:Math.round(((memoryTotal-memoryFree)/memoryTotal)*1000)/10},
+    cpu:{load1:Math.round(os.loadavg()[0]*100)/100,cores:os.cpus().length},disk,
+    liveConnections:systemSockets.size
+  }
+}
+
+app.get('/api/system/status',(req,res)=>res.json(systemSnapshot()))
 
 app.post('/api/request', async (req,res)=>{
   const {method='GET',url,headers={},body=''}=req.body||{}
@@ -97,14 +120,30 @@ app.use(express.static(dist))
 app.use((req,res,next)=>{if(req.path.startsWith('/api/')||req.path.startsWith('/hooks/'))return next();res.sendFile(path.join(dist,'index.html'))})
 const server=createServer(app)
 const hookWss=new WebSocketServer({noServer:true})
+const systemWss=new WebSocketServer({noServer:true})
 hookWss.on('connection',(socket,request,id)=>{
   hookSockets.get(id).add(socket)
   socket.send(JSON.stringify({type:'ready',endpointId:id,total:hooks.get(id).events.length}))
   socket.on('close',()=>hookSockets.get(id)?.delete(socket))
 })
+systemWss.on('connection',(socket)=>{
+  systemSockets.add(socket)
+  socket.send(JSON.stringify(systemSnapshot()))
+  socket.on('close',()=>systemSockets.delete(socket))
+})
+setInterval(()=>{
+  if(!systemSockets.size)return
+  const message=JSON.stringify(systemSnapshot())
+  for(const client of systemSockets)if(client.readyState===WebSocket.OPEN)client.send(message)
+},3000).unref()
 server.on('upgrade',(request,socket,head)=>{
   let match
-  try{match=new URL(request.url,'http://localhost').pathname.match(/^\/ws\/hooks\/([a-z0-9]{12})$/)}catch{}
+  let pathname
+  try{pathname=new URL(request.url,'http://localhost').pathname;match=pathname.match(/^\/ws\/hooks\/([a-z0-9]{12})$/)}catch{}
+  if(pathname==='/ws/system'){
+    systemWss.handleUpgrade(request,socket,head,client=>systemWss.emit('connection',client,request))
+    return
+  }
   const id=match?.[1]
   if(!id||!hooks.has(id)){socket.write('HTTP/1.1 404 Not Found\r\n\r\n');socket.destroy();return}
   hookWss.handleUpgrade(request,socket,head,client=>hookWss.emit('connection',client,request,id))

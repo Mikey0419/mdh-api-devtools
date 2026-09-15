@@ -12,6 +12,7 @@
     <script src="import.js" defer></script>
     <script src="app.js" defer></script>
     <script src="dashboard.js" defer></script>
+    <script src="system-status.js" defer></script>
     <script src="inbox.js" defer></script>
   </head>
   <body>
@@ -103,6 +104,21 @@
           <article><span id="history-count">0</span><p>History entries</p></article>
           <article><span id="notification-count">0</span><p>Unread alerts</p></article>
         </div>
+
+        <article class="system-monitor" aria-labelledby="system-monitor-title">
+          <header>
+            <div><p>VPS / LIVE</p><h2 id="system-monitor-title">System status</h2></div>
+            <span class="system-connection" id="system-connection"><i aria-hidden="true"></i> Connecting…</span>
+          </header>
+          <div class="system-metrics">
+            <div><span>App uptime</span><strong id="system-app-uptime">—</strong></div>
+            <div><span>CPU load</span><strong id="system-cpu">—</strong></div>
+            <div><span>Memory</span><strong id="system-memory">—</strong></div>
+            <div><span>Disk</span><strong id="system-disk">—</strong></div>
+            <div><span>Host uptime</span><strong id="system-host-uptime">—</strong></div>
+            <div><span>Updated</span><strong id="system-updated">—</strong></div>
+          </div>
+        </article>
 
         <div class="dashboard-grid">
           <article class="dashboard-panel dashboard-collections">
