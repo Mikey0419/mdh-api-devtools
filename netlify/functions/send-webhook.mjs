@@ -185,6 +185,27 @@ class RequestError extends Error {
   }
 }
 
+async function resolveWithDnsOverHttps(hostname) {
+  const resolver = "https://cloudflare-dns.com/dns-query";
+  const queries = ["A", "AAAA"].map(async (type) => {
+    const url = new URL(resolver);
+    url.searchParams.set("name", hostname);
+    url.searchParams.set("type", type);
+    const response = await fetch(url, {
+      headers: { Accept: "application/dns-json" },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!response.ok) return [];
+    const payload = await response.json();
+    return (payload.Answer || [])
+      .map((answer) => answer.data)
+      .filter((address) => net.isIP(address));
+  });
+
+  const results = await Promise.allSettled(queries);
+  return [...new Set(results.flatMap((result) => result.status === "fulfilled" ? result.value : []))];
+}
+
 async function validateTarget(rawUrl) {
   if (typeof rawUrl !== "string" || !rawUrl.trim()) {
     throw new RequestError(400, "A destination url is required.");
@@ -230,7 +251,10 @@ async function validateTarget(rawUrl) {
       const resolved = await dns.lookup(bareHost, { all: true, verbatim: true });
       addresses = resolved.map((entry) => entry.address);
     } catch {
-      throw new RequestError(400, `The host ${url.hostname} could not be resolved.`);
+      addresses = await resolveWithDnsOverHttps(bareHost);
+      if (!addresses.length) {
+        throw new RequestError(400, `The host ${url.hostname} could not be resolved.`);
+      }
     }
   }
 
