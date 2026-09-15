@@ -316,6 +316,8 @@
     stop();
     forget();
     endpointId = null;
+    serviceOrigin = API_ORIGIN;
+    liveState.textContent = "Connecting live stream…";
     live.hidden = true;
     idle.hidden = false;
     showError("");
