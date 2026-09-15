@@ -245,11 +245,33 @@
       </div>
       <div class="profile-avatar" id="profile-avatar" aria-hidden="true"></div>
       <dl class="profile-fields">
-        <div><dt>Name</dt><dd id="profile-name"></dd></div>
+        <div><dt>Auth0 name</dt><dd id="profile-name"></dd></div>
         <div><dt>Email</dt><dd id="profile-email"></dd></div>
         <div><dt>Email status</dt><dd id="profile-email-status"></dd></div>
       </dl>
-      <p class="profile-note">Your identity details are managed by your authentication provider.</p>
+      <form class="profile-settings-form" id="profile-settings-form">
+        <label for="display-name">Display name</label>
+        <input id="display-name" name="displayName" type="text" maxlength="50" autocomplete="nickname" />
+
+        <label for="interface-theme">Interface theme</label>
+        <select id="interface-theme" name="theme">
+          <option value="default">Terminal green</option>
+          <option value="cyan">Electric cyan</option>
+          <option value="amber">Signal amber</option>
+        </select>
+
+        <label class="setting-toggle" for="save-history">
+          <span><strong>Save request history</strong><small>Keep up to 25 recent request summaries in this browser.</small></span>
+          <input id="save-history" name="saveHistory" type="checkbox" />
+        </label>
+
+        <div class="profile-form-actions">
+          <button class="profile-save" type="submit">Save settings</button>
+          <button class="profile-clear" id="clear-history" type="button">Clear history</button>
+        </div>
+        <p class="settings-status" id="settings-status" role="status"></p>
+      </form>
+      <p class="profile-note">These preferences stay in this browser. Email and password are managed by your authentication provider.</p>
     </dialog>
   </body>
 </html>
