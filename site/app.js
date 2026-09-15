@@ -468,6 +468,21 @@ document.querySelector("#profile-avatar-image").addEventListener("error", (event
   document.querySelector("#profile-avatar-fallback").hidden = false;
 });
 
+
+function previewSettings() {
+  const displayName = document.querySelector("#display-name").value.trim();
+  const theme = document.querySelector("#interface-theme").value;
+  document.documentElement.dataset.theme = theme;
+  const previewName = displayName || currentUser?.name || currentUser?.nickname || currentUser?.email || "Account";
+  authLabel.textContent = previewName;
+  accountName.textContent = previewName;
+  document.querySelector("#profile-avatar-fallback").textContent = previewName.charAt(0).toUpperCase();
+  document.querySelector("#settings-status").textContent = "Previewing unsaved changes.";
+}
+
+document.querySelector("#display-name").addEventListener("input", previewSettings);
+document.querySelector("#interface-theme").addEventListener("change", previewSettings);
+
 document.querySelector("#profile-settings-form").addEventListener("submit", (event) => {
   event.preventDefault();
   userSettings = {
