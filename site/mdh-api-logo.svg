@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="286" height="64" viewBox="0 0 286 64" role="img" aria-labelledby="title desc">
+  <title id="title">MDH-API</title>
+  <desc id="desc">MDH-API terminal connector logo</desc>
+  <g fill="none" stroke="#47f0ae">
+    <rect x="1" y="6" width="52" height="52" rx="4" stroke-width="2"/>
+    <path d="m13 22 9 10-9 10M28 42h13" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+    <circle cx="46" cy="11" r="2" fill="#47f0ae" stroke="none"/>
+  </g>
+  <path d="M69 46V18h6.8l8.4 15.2L92.6 18h6.8v28h-6.2V28.6l-6.7 12.2h-4.6l-6.7-12.2V46H69Zm37.8 0V18h10.7c9.2 0 15.3 5.3 15.3 14s-6.1 14-15.3 14h-10.7Zm6.4-5.8h4.1c5.4 0 8.9-2.7 8.9-8.2s-3.5-8.2-8.9-8.2h-4.1v16.4ZM139.8 46V18h6.4v10.8h11.3V18h6.4v28h-6.4V34.6h-11.3V46h-6.4Z" fill="#edf4ef"/>
+  <path d="M172 33h18" stroke="#47f0ae" stroke-width="2"/>
+  <path d="M198 46l10.6-28h7.2l10.6 28h-6.8l-2.2-6.5h-10.8l-2.2 6.5H198Zm10.5-12.2h7l-3.5-10.3-3.5 10.3ZM232 46V18h11.9c6.9 0 11.5 3.7 11.5 9.9s-4.6 10-11.5 10h-5.5V46H232Zm6.4-13.8h5c3.5 0 5.5-1.5 5.5-4.3s-2-4.2-5.5-4.2h-5v8.5ZM262.2 46V18h6.4v28h-6.4Z" fill="#edf4ef"/>
+</svg>
