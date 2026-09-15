@@ -198,3 +198,39 @@ footer p:last-child { justify-self: end; }
 .inbox-event-actions button.ghost { background: #fff; color: #14865c; }
 .inbox-empty { margin: 1.2rem 0 0; color: #6b7f72; font-size: .82rem; }
 @media (max-width: 760px) { .inbox-response-grid { grid-template-columns: 1fr; } .inbox-from { margin-left: 0; } }
+
+
+/* ------------------------------------------------------------------ authentication */
+.auth-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: 0 .9rem;
+  border: 1px solid rgba(71,240,174,.38);
+  border-radius: 2px;
+  background: rgba(71,240,174,.07);
+  color: var(--paper);
+  cursor: pointer;
+  font-size: .82rem;
+  font-weight: 750;
+}
+.auth-button:hover:not(:disabled),
+.auth-button:focus-visible {
+  background: rgba(71,240,174,.14);
+  border-color: var(--acid);
+}
+.auth-button:disabled { cursor: wait; opacity: .58; }
+.auth-status {
+  width: 7px;
+  height: 7px;
+  background: var(--muted);
+  border-radius: 50%;
+}
+.auth-button.signed-in .auth-status {
+  background: var(--acid);
+  box-shadow: 0 0 10px rgba(71,240,174,.7);
+}
+@media (max-width: 920px) {
+  .auth-button { width: 100%; justify-content: flex-start; margin-top: .45rem; }
+}
