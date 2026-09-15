@@ -431,11 +431,11 @@ footer p:last-child { justify-self: end; }
   display: block;
   width: 164px;
   height: auto;
-  filter: invert(.88) brightness(1.35) contrast(1.08);
+  filter: none;
 }
 .brand-image-large { width: clamp(178px,20vw,220px); }
 .brand-image-footer .brand-image { width: 145px; }
-.brand-image-link:hover .brand-image,.brand-image-link:focus-visible .brand-image { filter: invert(.94) brightness(1.5) contrast(1.1); }
+.brand-image-link:hover .brand-image,.brand-image-link:focus-visible .brand-image { opacity: .86; }
 @media (max-width: 620px) {
   .brand-image { width: 142px; }
   .brand-image-large { width: 180px; }
