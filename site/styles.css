@@ -184,6 +184,7 @@ footer p:last-child { justify-self: end; }
 .inbox-bar button { min-height: 46px; padding: 0 1.1rem; border: 1px solid #14865c; background: #14865c; color: #fff; font-weight: 700; font-size: .8rem; cursor: pointer; }
 .inbox-bar button:hover { background: #0f6b49; }
 .inbox-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 0 0 1rem; font-size: .78rem; color: #4b6355; }
+.inbox-live-state { color: #14865c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 #inbox-pulse { width: 8px; height: 8px; border-radius: 50%; background: #9db0a4; }
 #inbox-pulse.flash { animation: inbox-pulse 1s ease-out; }
 @keyframes inbox-pulse { 0% { background: #14865c; box-shadow: 0 0 0 0 rgba(20,134,92,.55); } 100% { background: #9db0a4; box-shadow: 0 0 0 12px rgba(20,134,92,0); } }

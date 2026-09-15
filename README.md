@@ -66,10 +66,17 @@ For a VPS / DreamHost VPS:
 ```bash
 npm install
 npm run build
-pm2 start server/index.js --name mdh-api
+PUBLIC_ORIGIN=https://api.mdh-api.com pm2 start server/index.js --name mdh-api --update-env
 pm2 save
 ```
 Put Nginx or Apache in front of port 8002 and proxy `mdh-api.com` to it.
+
+The live webhook inbox uses `wss://api.mdh-api.com/ws/hooks/:id`. Apache must
+forward WebSocket upgrades as well as ordinary HTTP traffic. On Apache 2.4.47+
+the usual HTTP `ProxyPass` can handle upgrades with `upgrade=websocket`; older
+setups can use `mod_proxy_wstunnel`. After changing the virtual host, validate
+the configuration and reload Apache before testing the **Live** indicator in
+the inbox. The browser automatically falls back to polling if an upgrade fails.
 
 ## Current webhook storage
 Webhook events are intentionally in-memory for the MVP. Restarting the server clears them. For durable endpoints, add Redis/Postgres and endpoint ownership/authentication.

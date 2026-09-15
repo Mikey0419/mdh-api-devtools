@@ -30,12 +30,16 @@
   const responseStatus = root.querySelector("#inbox-response-status");
 
   const STORAGE_KEY = "mdh-api.inbox.endpoint";
-  const POLL_INTERVAL_MS = 3000;
+  const API_ORIGIN = "https://api.mdh-api.com";
+  const POLL_INTERVAL_MS = 15000;
+  let serviceOrigin = API_ORIGIN;
 
   let endpointId = null;
   let newestEventId = null;
   let seen = 0;
   let timer = null;
+  let socket = null;
+  const liveState = root.querySelector("#inbox-live-state");
 
   /* ------------------------------------------------------------- storage */
 
@@ -79,7 +83,16 @@
     const nextOptions = { ...(options || {}) };
     nextOptions.headers = { ...(nextOptions.headers || {}) };
     if (window.MDHAccessToken) nextOptions.headers.Authorization = `Bearer ${window.MDHAccessToken}`;
-    const response = await fetch(path, nextOptions);
+    let response;
+    try {
+      response = await fetch(`${serviceOrigin}${path}`, nextOptions);
+    } catch (error) {
+      if (serviceOrigin !== API_ORIGIN) throw error;
+    }
+    if ((!response || response.status === 404) && serviceOrigin === API_ORIGIN) {
+      serviceOrigin = location.origin;
+      response = await fetch(`${serviceOrigin}${path}`, nextOptions);
+    }
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
       throw new Error(
@@ -183,7 +196,9 @@
   function renderEvents(events) {
     if (!events.length) return;
     const fragment = document.createDocumentFragment();
-    events.forEach((event) => fragment.append(renderEvent(event)));
+    const fresh = events.filter((event) => !list.querySelector(`[data-event-id="${CSS.escape(event.id)}"]`));
+    fresh.forEach((event) => fragment.append(renderEvent(event)));
+    if (!fresh.length) return;
     list.prepend(fragment);
     empty.hidden = true;
 
@@ -207,7 +222,7 @@
 
       seen = payload.total;
       countLabel.textContent = seen === 1 ? "1 request" : `${seen} requests`;
-      expiryLabel.textContent = `expires ${new Date(payload.expiresAt).toLocaleString()}`;
+      expiryLabel.textContent = payload.expiresAt ? `expires ${new Date(payload.expiresAt).toLocaleString()}` : "active until server restart";
       showError("");
     } catch (error) {
       if (/expired|does not exist/i.test(error.message)) {
@@ -224,11 +239,39 @@
     stop();
     timer = setInterval(poll, POLL_INTERVAL_MS);
     poll();
+    connectLiveStream();
   }
 
   function stop() {
     if (timer) clearInterval(timer);
     timer = null;
+    if (socket) socket.close(1000, "Inbox paused");
+    socket = null;
+  }
+
+  function connectLiveStream() {
+    if (!endpointId || document.hidden) return;
+    if (serviceOrigin !== API_ORIGIN) {
+      liveState.textContent = "Polling fallback";
+      return;
+    }
+    const wsOrigin = serviceOrigin.replace(/^http/, "ws");
+    liveState.textContent = "Connecting live stream…";
+    socket = new WebSocket(`${wsOrigin}/ws/hooks/${endpointId}`);
+    socket.addEventListener("open", () => { liveState.textContent = "Live"; showError(""); });
+    socket.addEventListener("message", (message) => {
+      let payload;
+      try { payload = JSON.parse(message.data); } catch { return; }
+      if (payload.type !== "webhook.received" || !payload.event) return;
+      newestEventId = payload.event.id;
+      seen = Number(payload.total || seen + 1);
+      countLabel.textContent = seen === 1 ? "1 request" : `${seen} requests`;
+      renderEvents([payload.event]);
+    });
+    socket.addEventListener("close", () => {
+      if (endpointId && !document.hidden) liveState.textContent = "Polling fallback";
+    });
+    socket.addEventListener("error", () => { liveState.textContent = "Polling fallback"; });
   }
 
   document.addEventListener("visibilitychange", () => {
@@ -242,7 +285,7 @@
   async function attach(id, meta) {
     endpointId = id;
     remember(id);
-    urlField.value = meta?.url || `${location.origin}/hooks/${id}`;
+    urlField.value = meta?.url || `${serviceOrigin}/hooks/${id}`;
     idle.hidden = true;
     live.hidden = false;
     list.textContent = "";
