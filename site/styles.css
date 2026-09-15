@@ -356,6 +356,8 @@ footer p:last-child { justify-self: end; }
 #auth-logout { border-top: 1px solid var(--line); color: #ffb2a6; }
 .profile-dialog {
   width: min(92vw,520px);
+  max-height: 90svh;
+  overflow: auto;
   padding: 0;
   border: 1px solid rgba(71,240,174,.28);
   border-radius: 4px;
