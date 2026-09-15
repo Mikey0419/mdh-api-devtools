@@ -418,3 +418,28 @@ footer p:last-child { justify-self: end; }
 .profile-avatar { overflow: hidden; }
 .profile-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .profile-avatar span { width: 100%; height: 100%; display: grid; place-items: center; }
+
+
+/* ------------------------------------------------------------------ official logo */
+.brand-image-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: .28rem .48rem;
+  border: 1px solid rgba(237,244,239,.2);
+  border-radius: 3px;
+  background: var(--paper);
+  line-height: 0;
+}
+.brand-image {
+  display: block;
+  width: 164px;
+  height: auto;
+}
+.brand-image-large { width: clamp(178px,20vw,220px); }
+.brand-image-footer .brand-image { width: 145px; }
+.brand-image-link:hover,.brand-image-link:focus-visible { border-color: var(--acid); box-shadow: 0 0 0 2px rgba(71,240,174,.1); }
+@media (max-width: 620px) {
+  .brand-image { width: 142px; }
+  .brand-image-large { width: 180px; }
+}
