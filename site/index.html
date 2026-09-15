@@ -17,6 +17,42 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="grid-field" aria-hidden="true"></div>
 
+    <main class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+      <section class="auth-brand">
+        <a class="brand auth-brand-logo" href="/" aria-label="MDH-API home">
+          <span>MDH</span>
+          <span class="connector" aria-hidden="true"><i></i><b>&lt;/&gt;</b><i></i></span>
+          <span>API</span>
+        </a>
+        <div class="auth-brand-copy">
+          <p class="eyebrow"><span></span> Developer workspace</p>
+          <h1 id="auth-title">Build. Test.<br /><em>Connect.</em></h1>
+          <p>One focused workspace for HTTP requests, webhook inspection, and WebSocket connections.</p>
+        </div>
+        <p class="auth-connection"><i aria-hidden="true"></i> Secure connection</p>
+      </section>
+
+      <section class="auth-entry" aria-label="Sign in">
+        <div class="auth-card">
+          <p class="auth-index">AUTH / 01</p>
+          <div id="auth-loading" class="auth-loading" role="status">Checking your session…</div>
+          <div id="auth-login-view" hidden>
+            <h2>Welcome back.</h2>
+            <p>Sign in to open your MDH-API workspace, or create an account if this is your first visit.</p>
+            <button class="auth-primary" id="auth-login" type="button">Sign in <span aria-hidden="true">→</span></button>
+            <button class="auth-secondary" id="auth-signup" type="button">Create an account <span aria-hidden="true">+</span></button>
+            <small>Authentication is securely managed by Auth0. MDH-API never receives or stores your password.</small>
+          </div>
+          <div id="auth-error-view" hidden>
+            <h2>Unable to sign in.</h2>
+            <p class="auth-error" id="auth-error" role="alert"></p>
+            <button class="auth-secondary" id="auth-retry" type="button">Try again <span aria-hidden="true">↻</span></button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="app-shell" hidden>
     <header class="site-header">
       <a class="brand" href="#top" aria-label="MDH-API home">
         <span>MDH</span>
@@ -183,5 +219,6 @@
       <p>Tools for the space between request and response.</p>
       <p>© <span id="year"></span> MDH-API</p>
     </footer>
+    </div>
   </body>
 </html>
