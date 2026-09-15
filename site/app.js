@@ -443,7 +443,15 @@ document.querySelector("#profile-settings").addEventListener("click", () => {
   document.querySelector("#profile-name").textContent = currentUser.name || currentUser.nickname || "Not provided";
   document.querySelector("#profile-email").textContent = currentUser.email || "Not provided";
   document.querySelector("#profile-email-status").textContent = currentUser.email_verified ? "Verified" : "Not verified";
-  document.querySelector("#profile-avatar").textContent = (userSettings.displayName || currentUser.name || currentUser.email || "U").trim().charAt(0).toUpperCase();
+  const avatarImage = document.querySelector("#profile-avatar-image");
+  const avatarFallback = document.querySelector("#profile-avatar-fallback");
+  avatarFallback.textContent = (userSettings.displayName || currentUser.name || currentUser.email || "U").trim().charAt(0).toUpperCase();
+  avatarFallback.hidden = Boolean(currentUser.picture);
+  avatarImage.hidden = !currentUser.picture;
+  if (currentUser.picture) {
+    avatarImage.src = currentUser.picture;
+    avatarImage.alt = `${currentUser.name || "User"} profile image`;
+  }
   document.querySelector("#display-name").value = userSettings.displayName;
   document.querySelector("#interface-theme").value = userSettings.theme;
   document.querySelector("#save-history").checked = userSettings.saveHistory;
@@ -453,6 +461,12 @@ document.querySelector("#profile-settings").addEventListener("click", () => {
   profileDialog.showModal();
 });
 
+
+
+document.querySelector("#profile-avatar-image").addEventListener("error", (event) => {
+  event.currentTarget.hidden = true;
+  document.querySelector("#profile-avatar-fallback").hidden = false;
+});
 
 document.querySelector("#profile-settings-form").addEventListener("submit", (event) => {
   event.preventDefault();
