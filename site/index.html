@@ -243,7 +243,10 @@
         </div>
         <button id="profile-close" type="button" aria-label="Close profile settings">×</button>
       </div>
-      <div class="profile-avatar" id="profile-avatar" aria-hidden="true"></div>
+      <div class="profile-avatar" id="profile-avatar">
+        <img id="profile-avatar-image" alt="" referrerpolicy="no-referrer" hidden />
+        <span id="profile-avatar-fallback" aria-hidden="true"></span>
+      </div>
       <dl class="profile-fields">
         <div><dt>Auth0 name</dt><dd id="profile-name"></dd></div>
         <div><dt>Email</dt><dd id="profile-email"></dd></div>
