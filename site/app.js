@@ -11,9 +11,15 @@ const sendButton = document.querySelector(".send-button");
 const toolTabs = [...document.querySelectorAll(".tool-tabs button")];
 const deliveryNote = document.querySelector("#delivery-note");
 
-// Webhook deliveries are proxied by netlify/functions/send-webhook.mjs so the
-// destination is contacted server-side, out of reach of browser CORS.
-const WEBHOOK_PROXY_ENDPOINT = "/api/send-webhook";
+const importPanel = document.querySelector("#import-panel");
+const importInput = document.querySelector("#import-input");
+const importButton = document.querySelector("#import-button");
+const importStatus = document.querySelector("#import-status");
+
+// Requests are proxied by netlify/functions/send-webhook.mjs so the destination
+// is contacted server-side, out of reach of browser CORS. Webhook deliveries
+// always go this way; HTTP requests fall back to it when the browser is blocked.
+const PROXY_ENDPOINT = "/api/send-webhook";
 
 document.querySelector("#year").textContent = new Date().getFullYear();
 
@@ -66,10 +72,10 @@ function activeTool() {
   return document.querySelector(".tool-tabs button.active").dataset.tool;
 }
 
-async function deliverWebhook({ url, method, headers, body }) {
+async function sendViaProxy({ url, method, headers, body }) {
   let response;
   try {
-    response = await fetch(WEBHOOK_PROXY_ENDPOINT, {
+    response = await fetch(PROXY_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, method, headers, body })
@@ -81,7 +87,7 @@ async function deliverWebhook({ url, method, headers, body }) {
   if (!(response.headers.get("content-type") || "").includes("application/json")) {
     throw new Error(
       response.status === 404
-        ? "The webhook function is not deployed at " + WEBHOOK_PROXY_ENDPOINT + ". Run `netlify dev` locally, or redeploy the site with netlify/functions/send-webhook.mjs in place."
+        ? "The webhook function is not deployed at " + PROXY_ENDPOINT + ". Run `netlify dev` locally, or redeploy the site with netlify/functions/send-webhook.mjs in place."
         : "The webhook service returned an unexpected response (" + response.status + ")."
     );
   }
@@ -95,6 +101,18 @@ async function deliverWebhook({ url, method, headers, body }) {
   }
 
   return result;
+}
+
+function renderProxyResult(result, prefixLines = []) {
+  const rendered = typeof result.body === "string" ? result.body : JSON.stringify(result.body, null, 2);
+  const lines = [...prefixLines];
+  if (result.note) lines.push(`// ${result.note}`);
+  if (result.truncated) lines.push("// Response truncated at 256 KB.");
+  lines.push(rendered || "// Empty response body");
+
+  responseOutput.textContent = lines.join("\n");
+  statusCode.textContent = `${result.status} ${result.ok ? "OK" : "ERROR"}`;
+  responseTime.textContent = `${result.durationMs} ms`;
 }
 
 function runWebSocket(url) {
@@ -143,27 +161,39 @@ form.addEventListener("submit", async (event) => {
       statusCode.textContent = "OPEN";
       responseTime.textContent = `${result.elapsed} ms`;
     } else if (tool === "Webhook") {
-      const result = await deliverWebhook({
+      renderProxyResult(await sendViaProxy({
         url: endpointInput.value,
         method: methodSelect.value,
         headers: parseHeaders(),
         body: bodyInput.value.trim()
-      });
-
-      const rendered = typeof result.body === "string" ? result.body : JSON.stringify(result.body, null, 2);
-      const lines = [];
-      if (result.note) lines.push(`// ${result.note}`);
-      if (result.truncated) lines.push("// Response truncated at 256 KB.");
-      lines.push(rendered || "// Empty response body");
-
-      responseOutput.textContent = lines.join("\n");
-      statusCode.textContent = `${result.status} ${result.ok ? "OK" : "ERROR"}`;
-      responseTime.textContent = `${result.durationMs} ms`;
+      }));
     } else {
       const method = methodSelect.value;
       const options = { method, headers: parseHeaders() };
       if (!["GET", "DELETE"].includes(method) && bodyInput.value.trim()) options.body = bodyInput.value;
-      const response = await fetch(endpointInput.value, options);
+
+      let response;
+      try {
+        response = await fetch(endpointInput.value, options);
+      } catch (directError) {
+        // A TypeError here is the browser refusing the request outright \u2014 almost
+        // always CORS. The endpoint may be perfectly healthy, so retry it
+        // server-side rather than dead-ending on "Failed to fetch".
+        if (!(directError instanceof TypeError)) throw directError;
+
+        renderProxyResult(
+          await sendViaProxy({
+            url: endpointInput.value,
+            method,
+            headers: parseHeaders(),
+            body: ["GET", "DELETE"].includes(method) ? "" : bodyInput.value.trim()
+          }),
+          ["// The browser blocked this request (CORS). Retried server-side."]
+        );
+        copyButton.disabled = false;
+        sendButton.disabled = false;
+        return;
+      }
       const text = await response.text();
       let formatted = text;
       try { formatted = JSON.stringify(JSON.parse(text), null, 2); } catch { /* Keep plain text. */ }
@@ -183,6 +213,76 @@ form.addEventListener("submit", async (event) => {
   } finally {
     sendButton.disabled = false;
   }
+});
+
+/* ---------------------------------------------------------------- import */
+
+function announceImport(message, tone = "ok") {
+  importStatus.textContent = message;
+  importStatus.dataset.tone = tone;
+  if (tone === "ok") setTimeout(() => { if (importStatus.textContent === message) importStatus.textContent = ""; }, 6000);
+}
+
+function applyImport(parsed) {
+  if (parsed.method) {
+    if (![...methodSelect.options].some((option) => option.value === parsed.method)) {
+      methodSelect.add(new Option(parsed.method, parsed.method));
+    }
+    methodSelect.value = parsed.method;
+  }
+
+  endpointInput.value = parsed.url;
+
+  if (Object.keys(parsed.headers).length) {
+    headersInput.value = JSON.stringify(parsed.headers, null, 2);
+  }
+  if (parsed.body !== null && parsed.body !== undefined) {
+    bodyInput.value = parsed.body;
+  }
+
+  statusCode.textContent = "READY";
+  responseTime.textContent = "\u2014 ms";
+  responseOutput.textContent = "// Imported. Press send to run it.";
+  copyButton.disabled = true;
+
+  const labels = { curl: "curl command", fetch: "fetch() call", httpie: "HTTPie command", url: "URL" };
+  const summary = `Imported ${labels[parsed.format] || parsed.format}: ${parsed.method || methodSelect.value} ${parsed.url}`;
+  announceImport(parsed.warnings.length ? `${summary} \u2014 ${parsed.warnings.join(" ")}` : summary, parsed.warnings.length ? "warn" : "ok");
+}
+
+function runImport(text) {
+  const parsed = window.MDHImport ? window.MDHImport.parseRequestSnippet(text) : null;
+  if (!parsed) {
+    announceImport("That did not look like a curl command, a fetch() call, an HTTPie command, or a URL.", "error");
+    return false;
+  }
+  applyImport(parsed);
+  return true;
+}
+
+importButton.addEventListener("click", () => {
+  if (runImport(importInput.value)) importInput.value = "";
+});
+
+importInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault();
+    importButton.click();
+  }
+});
+
+// Pasting a whole command into the endpoint field is the fastest path, so
+// intercept it: anything richer than a bare URL fills the form instead.
+endpointInput.addEventListener("paste", (event) => {
+  const text = (event.clipboardData || window.clipboardData)?.getData("text") || "";
+  if (!text.trim() || !window.MDHImport) return;
+
+  const parsed = window.MDHImport.parseRequestSnippet(text);
+  if (!parsed || parsed.format === "url") return;
+
+  event.preventDefault();
+  importPanel.open = true;
+  applyImport(parsed);
 });
 
 copyButton.addEventListener("click", async () => {

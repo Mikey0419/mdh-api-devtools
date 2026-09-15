@@ -8,7 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2307100e'/%3E%3Cpath d='M11 9 5 16l6 7M21 9l6 7-6 7M18 6l-4 20' fill='none' stroke='%2347f0ae' stroke-width='2.8' stroke-linecap='square'/%3E%3C/svg%3E" />
     <title>MDH-API — Developer Tools, Without the Noise</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="import.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="inbox.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -22,6 +24,7 @@
       </a>
       <nav aria-label="Primary navigation">
         <a href="#workspace">Workspace</a>
+        <a href="#inbox">Inbox</a>
         <a href="#tools">Tools</a>
         <a class="github-link" href="https://github.com/Mikey0419/mdh-api-devtools" target="_blank" rel="noreferrer">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.22c-3.23.7-3.91-1.37-3.91-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.58-.29-5.29-1.29-5.29-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18A10.95 10.95 0 0 1 12 6.13c.98 0 1.95.13 2.86.38 2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.4-2.72 5.38-5.3 5.67.42.36.79 1.06.79 2.14v3.27c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
@@ -78,6 +81,16 @@
               <button type="button" role="tab" aria-selected="false" data-tool="WebSocket">WebSocket</button>
             </div>
             <form id="request-form">
+              <details class="import-panel" id="import-panel">
+                <summary>Import from curl, fetch, or HTTPie</summary>
+                <label class="sr-only" for="import-input">Snippet to import</label>
+                <textarea id="import-input" spellcheck="false" rows="3" placeholder="curl -X POST https://example.com/hook -H 'X-Key: abc' -d '{&quot;event&quot;:&quot;created&quot;}'"></textarea>
+                <div class="import-actions">
+                  <button type="button" id="import-button">Import</button>
+                  <span id="import-status" role="status"></span>
+                </div>
+              </details>
+
               <label for="endpoint">Endpoint</label>
               <div class="endpoint-row">
                 <select id="method" aria-label="HTTP method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
@@ -104,13 +117,57 @@
         </div>
       </section>
 
+      <section class="inbox" id="inbox" aria-labelledby="inbox-title">
+        <div class="section-heading">
+          <div><p class="section-index">02 / INBOX</p><h2 id="inbox-title">Receive a webhook</h2></div>
+          <p>Get a public URL, point a service at it, and watch what actually arrives.</p>
+        </div>
+
+        <div id="inbox-idle">
+          <button class="button button-primary" type="button" id="inbox-create">Create an endpoint <span aria-hidden="true">→</span></button>
+          <p class="inbox-hint">The endpoint is live for 24 hours and keeps the last 100 requests. Anyone with the URL can post to it, so do not send real secrets through it.</p>
+        </div>
+
+        <div id="inbox-live" hidden>
+          <div class="inbox-bar">
+            <label class="sr-only" for="inbox-url">Your endpoint URL</label>
+            <input id="inbox-url" type="text" readonly spellcheck="false" />
+            <button type="button" id="inbox-copy">Copy</button>
+          </div>
+          <p class="inbox-meta">
+            <span id="inbox-pulse" aria-hidden="true"></span>
+            <span id="inbox-count">0 requests</span>
+            <span id="inbox-expiry"></span>
+            <button type="button" class="link-button" id="inbox-clear">Clear</button>
+            <button type="button" class="link-button" id="inbox-forget">Forget endpoint</button>
+          </p>
+          <p class="inbox-error" id="inbox-error" role="alert" hidden></p>
+
+          <details class="inbox-response">
+            <summary>Customise the reply this endpoint sends</summary>
+            <div class="inbox-response-grid">
+              <div><label for="inbox-status-code">Status</label><input id="inbox-status-code" type="number" min="100" max="599" value="200" /></div>
+              <div><label for="inbox-response-body">Body</label><textarea id="inbox-response-body" rows="3" spellcheck="false">{"ok":true,"received":true}</textarea></div>
+            </div>
+            <div class="inbox-response-actions">
+              <button type="button" id="inbox-save-response">Save response</button>
+              <span id="inbox-response-status"></span>
+            </div>
+          </details>
+
+          <div id="inbox-events"></div>
+          <p class="inbox-empty" id="inbox-empty">Waiting for the first request…</p>
+        </div>
+      </section>
+
       <section class="tools" id="tools" aria-labelledby="tools-title">
         <div class="section-heading">
-          <div><p class="section-index">02 / TOOLKIT</p><h2 id="tools-title">One workspace. Three protocols.</h2></div>
+          <div><p class="section-index">03 / TOOLKIT</p><h2 id="tools-title">One workspace. Send and receive.</h2></div>
         </div>
         <div class="tool-grid">
           <article><span>HTTP</span><h3>Request Builder</h3><p>Compose methods, headers, and JSON bodies. Inspect the response without extra setup.</p><a href="#workspace">Build a request ↗</a></article>
           <article><span>HOOK</span><h3>Webhook Tester</h3><p>Deliver sample events server-side to any HTTPS endpoint, then inspect the exact status, headers, and body that came back.</p><a href="#workspace" data-select-tool="Webhook">Test a payload ↗</a></article>
+          <article><span>INBOX</span><h3>Webhook Receiver</h3><p>Take a public URL, point a real service at it, and read every request it sends — headers, query, and body.</p><a href="#inbox">Open the inbox ↗</a></article>
           <article><span>WS</span><h3>WebSocket Client</h3><p>Open a live connection, send messages, and watch events arrive in real time.</p><a href="#workspace" data-select-tool="WebSocket">Open a socket ↗</a></article>
         </div>
       </section>

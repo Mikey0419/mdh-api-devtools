@@ -144,3 +144,57 @@ footer p:last-child { justify-self: end; }
 
 .delivery-note { margin: 1rem 0 0; padding: .75rem .85rem; border-left: 2px solid #14865c; background: rgba(20, 134, 92, .07); color: #33503f; font-size: .78rem; line-height: 1.55; }
 .delivery-note b { color: var(--ink); font-weight: 750; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.import-panel { margin: 0 0 1.25rem; border: 1px solid #c6d3cb; background: #fff; }
+.import-panel > summary { cursor: pointer; padding: .6rem .8rem; font-size: .78rem; font-weight: 700; letter-spacing: .03em; color: #14865c; list-style: none; }
+.import-panel > summary::-webkit-details-marker { display: none; }
+.import-panel > summary::before { content: "+ "; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.import-panel[open] > summary::before { content: "\2212 "; }
+.import-panel textarea { display: block; width: 100%; margin: 0 0 .6rem; padding: .6rem .7rem; border-top: 1px solid #c6d3cb; border-left: 0; border-right: 0; border-bottom: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .76rem; line-height: 1.5; resize: vertical; }
+.import-actions { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; padding: 0 .8rem .7rem; }
+.import-actions button { min-height: 34px; padding: 0 .9rem; border: 1px solid #14865c; background: #14865c; color: #fff; font-size: .76rem; font-weight: 700; cursor: pointer; }
+.import-actions button:hover { background: #0f6b49; }
+#import-status { font-size: .73rem; line-height: 1.45; color: #33503f; }
+#import-status[data-tone="error"] { color: #a33222; }
+#import-status[data-tone="warn"] { color: #8a5a10; }
+
+/* ------------------------------------------------------------------ inbox */
+.inbox { background: var(--paper); color: var(--ink); padding: clamp(3rem, 7vw, 6rem) clamp(1.25rem, 6vw, 6rem); border-top: 1px solid rgba(7,16,14,.12); }
+.inbox .section-heading p { color: #33503f; }
+.inbox-hint { max-width: 62ch; margin: 1rem 0 0; color: #4b6355; font-size: .82rem; line-height: 1.6; }
+.inbox-bar { display: flex; gap: .6rem; flex-wrap: wrap; margin: 0 0 .9rem; }
+.inbox-bar input { flex: 1 1 340px; min-width: 0; min-height: 46px; padding: 0 .8rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; background: #fff; }
+.inbox-bar button { min-height: 46px; padding: 0 1.1rem; border: 1px solid #14865c; background: #14865c; color: #fff; font-weight: 700; font-size: .8rem; cursor: pointer; }
+.inbox-bar button:hover { background: #0f6b49; }
+.inbox-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 0 0 1rem; font-size: .78rem; color: #4b6355; }
+#inbox-pulse { width: 8px; height: 8px; border-radius: 50%; background: #9db0a4; }
+#inbox-pulse.flash { animation: inbox-pulse 1s ease-out; }
+@keyframes inbox-pulse { 0% { background: #14865c; box-shadow: 0 0 0 0 rgba(20,134,92,.55); } 100% { background: #9db0a4; box-shadow: 0 0 0 12px rgba(20,134,92,0); } }
+.link-button { border: 0; background: none; padding: 0; color: #14865c; font-size: .78rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.inbox-error { margin: 0 0 1rem; padding: .7rem .8rem; border-left: 2px solid #a33222; background: rgba(163,50,34,.07); color: #a33222; font-size: .8rem; }
+.inbox-response { margin: 0 0 1.4rem; border: 1px solid #c6d3cb; background: #fff; }
+.inbox-response > summary { cursor: pointer; padding: .6rem .8rem; font-size: .78rem; font-weight: 700; color: #14865c; }
+.inbox-response-grid { display: grid; grid-template-columns: 120px 1fr; gap: 1rem; padding: .3rem .8rem .8rem; }
+.inbox-response-grid label { display: block; margin: 0 0 .35rem; font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #4b6355; }
+.inbox-response-grid input, .inbox-response-grid textarea { width: 100%; padding: .5rem .6rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; }
+.inbox-response-actions { display: flex; align-items: center; gap: .8rem; padding: 0 .8rem .8rem; }
+.inbox-response-actions button { min-height: 32px; padding: 0 .9rem; border: 1px solid #14865c; background: #fff; color: #14865c; font-size: .76rem; font-weight: 700; cursor: pointer; }
+#inbox-response-status { font-size: .74rem; color: #33503f; }
+.inbox-event { border: 1px solid #c6d3cb; border-bottom: 0; background: #fff; }
+.inbox-event:last-child { border-bottom: 1px solid #c6d3cb; }
+.inbox-event > summary { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: .7rem .8rem; cursor: pointer; font-size: .78rem; }
+.inbox-method { display: inline-block; min-width: 56px; padding: .18rem .4rem; background: var(--ink); color: var(--acid); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; font-weight: 800; text-align: center; }
+.inbox-method[data-method="GET"] { background: #14865c; color: #fff; }
+.inbox-method[data-method="DELETE"] { background: #a33222; color: #fff; }
+.inbox-when { font-weight: 700; }
+.inbox-size, .inbox-from { color: #6b7f72; font-size: .74rem; }
+.inbox-from { margin-left: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.inbox-detail { padding: 0 .8rem .8rem; border-top: 1px solid #e3eae6; }
+.inbox-detail h4 { margin: .9rem 0 .35rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: #4b6355; }
+.inbox-detail pre { margin: 0; padding: .6rem .7rem; max-height: 260px; overflow: auto; background: #f4f7f5; font-size: .74rem; line-height: 1.5; }
+.inbox-event-actions { display: flex; gap: .6rem; margin: .9rem 0 0; }
+.inbox-event-actions button { min-height: 32px; padding: 0 .8rem; border: 1px solid #14865c; background: #14865c; color: #fff; font-size: .74rem; font-weight: 700; cursor: pointer; }
+.inbox-event-actions button.ghost { background: #fff; color: #14865c; }
+.inbox-empty { margin: 1.2rem 0 0; color: #6b7f72; font-size: .82rem; }
+@media (max-width: 760px) { .inbox-response-grid { grid-template-columns: 1fr; } .inbox-from { margin-left: 0; } }
