@@ -18,6 +18,7 @@ import {
   MAX_STORED_BODY_BYTES,
   json,
 } from "./_hooks-store.mjs";
+import { getStore } from "@netlify/blobs";
 
 // Headers that say more about Netlify's edge than about the sender.
 const NOISE_HEADERS = new Set([
@@ -97,6 +98,26 @@ export default async function handler(request, context) {
 
   await writeEndpoint(id, { ...endpoint, eventIds: keep, lastEventAt: receivedAt });
   await Promise.all(drop.map((old) => store.delete(`${id}/${old}`).catch(() => {})));
+
+  if (endpoint.ownerSub) {
+    const userStore = getStore({ name: "mdh-user-data", consistency: "strong" });
+    const userKey = encodeURIComponent(endpoint.ownerSub);
+    const userData = (await userStore.get(userKey, { type: "json" }).catch(() => null)) || {
+      settings: {}, collections: [], history: [], notifications: [],
+    };
+    const notification = {
+      id: crypto.randomUUID(),
+      type: "webhook.received",
+      message: `${request.method} webhook received on ${id}`,
+      endpointId: id,
+      eventId,
+      createdAt: receivedAt,
+      read: false,
+    };
+    userData.notifications = [notification, ...(userData.notifications || [])].slice(0, 50);
+    userData.updatedAt = receivedAt;
+    await userStore.setJSON(userKey, userData);
+  }
 
   // --- reply ----------------------------------------------------------------
 

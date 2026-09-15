@@ -351,6 +351,11 @@ function recordRequest() {
     createdAt: new Date().toISOString()
   });
   localStorage.setItem(historyKey(), JSON.stringify(history.slice(0, 25)));
+  window.MDHDashboard?.record({
+    method: methodSelect.value,
+    endpoint: endpointInput.value,
+    tool: activeTool()
+  });
 }
 
 function showLogin() {
@@ -406,6 +411,18 @@ async function initializeAuth() {
       accountEmail.textContent = user?.email || "No email available";
       loadSettings();
       showWorkspace();
+      let accessToken = null;
+      try {
+        accessToken = await authClient.getTokenSilently({
+          authorizationParams: { audience: "https://api.mdh-api.com" }
+        });
+      } catch (error) {
+        console.warn("Cross-device sync is not configured yet:", error.message);
+      }
+      window.MDHAccessToken = accessToken;
+      window.dispatchEvent(new CustomEvent("mdh:authenticated", {
+        detail: { user, token: accessToken }
+      }));
     } else {
       authLabel.textContent = "Sign in";
       authButton.title = "Sign in to MDH-API";
@@ -492,12 +509,21 @@ document.querySelector("#profile-settings-form").addEventListener("submit", (eve
   };
   localStorage.setItem(settingsKey(), JSON.stringify(userSettings));
   applySettings();
+  window.MDHDashboard?.saveSettings(userSettings);
   document.querySelector("#settings-status").textContent = "Settings saved.";
 });
 
 document.querySelector("#clear-history").addEventListener("click", () => {
   if (historyKey()) localStorage.removeItem(historyKey());
+  window.MDHDashboard?.clearHistory();
   document.querySelector("#settings-status").textContent = "Request history cleared.";
+});
+
+window.addEventListener("mdh:synced-settings", (event) => {
+  if (!event.detail || !Object.keys(event.detail).length) return;
+  userSettings = { ...userSettings, ...event.detail };
+  localStorage.setItem(settingsKey(), JSON.stringify(userSettings));
+  applySettings();
 });
 
 form.addEventListener("submit", recordRequest);

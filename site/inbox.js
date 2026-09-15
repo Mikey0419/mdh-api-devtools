@@ -76,7 +76,10 @@
   }
 
   async function api(path, options) {
-    const response = await fetch(path, options);
+    const nextOptions = { ...(options || {}) };
+    nextOptions.headers = { ...(nextOptions.headers || {}) };
+    if (window.MDHAccessToken) nextOptions.headers.Authorization = `Bearer ${window.MDHAccessToken}`;
+    const response = await fetch(path, nextOptions);
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
       throw new Error(

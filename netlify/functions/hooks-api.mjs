@@ -24,6 +24,7 @@ import {
   MAX_RESPONSE_BODY_BYTES,
   json,
 } from "./_hooks-store.mjs";
+import { requireUser } from "./_auth.mjs";
 
 const CREATE_RATE_LIMIT = { windowMs: 60_000, max: 10 };
 const createBuckets = new Map();
@@ -65,6 +66,7 @@ export default async function handler(request) {
   const url = new URL(request.url);
   const segments = url.pathname.replace(/^\/api\/hooks\/?/, "").split("/").filter(Boolean);
   const [id, resource] = segments;
+  const user = await requireUser(request).catch(() => null);
 
   // --- create ---------------------------------------------------------------
 
@@ -79,7 +81,7 @@ export default async function handler(request) {
     }
 
     const newId = newEndpointId();
-    const endpoint = defaultEndpoint();
+    const endpoint = { ...defaultEndpoint(), ownerSub: user?.sub || null };
     await writeEndpoint(newId, endpoint);
 
     return json(201, {

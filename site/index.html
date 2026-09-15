@@ -11,6 +11,7 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js" defer></script>
     <script src="import.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="dashboard.js" defer></script>
     <script src="inbox.js" defer></script>
   </head>
   <body>
@@ -56,6 +57,7 @@
         <img class="brand-image" src="mdh-api-logo.svg" alt="MDH-API" />
       </a>
       <nav aria-label="Primary navigation">
+        <a href="#dashboard">Dashboard</a>
         <a href="#workspace">Workspace</a>
         <a href="#inbox">Inbox</a>
         <a href="#tools">Tools</a>
@@ -87,6 +89,37 @@
     </header>
 
     <main id="main">
+      <section class="dashboard" id="dashboard" aria-labelledby="dashboard-title">
+        <div class="dashboard-heading">
+          <div>
+            <p class="section-index">00 / DASHBOARD</p>
+            <h1 id="dashboard-title">Your workspace.</h1>
+          </div>
+          <span class="sync-state" id="sync-state">Connecting secure sync…</span>
+        </div>
+
+        <div class="dashboard-stats" aria-label="Workspace summary">
+          <article><span id="collection-count">0</span><p>Saved requests</p></article>
+          <article><span id="history-count">0</span><p>History entries</p></article>
+          <article><span id="notification-count">0</span><p>Unread alerts</p></article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="dashboard-panel dashboard-collections">
+            <header><div><p>Collections</p><h2>Reusable requests</h2></div><button id="save-current-request" type="button">Save current request +</button></header>
+            <ul id="collection-list"></ul>
+          </article>
+          <article class="dashboard-panel">
+            <header><div><p>Activity</p><h2>Recent requests</h2></div><a href="#workspace">Open lab →</a></header>
+            <ul class="dashboard-list" id="recent-history"></ul>
+          </article>
+          <article class="dashboard-panel">
+            <header><div><p>Notifications</p><h2>Webhook activity</h2></div><a href="#inbox">Open inbox →</a></header>
+            <ul class="dashboard-list" id="notification-list"></ul>
+          </article>
+        </div>
+      </section>
+
       <section class="hero" id="top">
         <div class="hero-copy">
           <p class="eyebrow"><span></span> Independent developer workspace</p>
