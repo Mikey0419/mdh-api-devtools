@@ -42,7 +42,8 @@ menuButton.addEventListener("click", () => {
   nav.classList.toggle("open", !open);
 });
 
-nav.addEventListener("click", () => {
+nav.addEventListener("click", (event) => {
+  if (!event.target.closest("a")) return;
   nav.classList.remove("open");
   menuButton.setAttribute("aria-expanded", "false");
 });
