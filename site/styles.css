@@ -382,3 +382,32 @@ footer p:last-child { justify-self: end; }
   .account-control:not(.open):hover .account-dropdown,
   .account-control:not(.open):focus-within .account-dropdown { display: none; }
 }
+
+
+/* ------------------------------------------------------------------ editable profile settings */
+:root[data-theme="cyan"] { --acid: #67e8f9; --acid-2: #b7f5ff; }
+:root[data-theme="amber"] { --acid: #ffc857; --acid-2: #ffe0a3; }
+.profile-settings-form { display: grid; gap: .7rem; padding: 1.35rem 1.5rem 0; }
+.profile-settings-form label:not(.setting-toggle) { margin-top: .35rem; color: var(--muted); font-size: .72rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.profile-settings-form input[type="text"],
+.profile-settings-form select {
+  width: 100%;
+  height: 44px;
+  padding: 0 .75rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #07100e;
+  color: var(--paper);
+}
+.profile-settings-form input:focus,
+.profile-settings-form select:focus { border-color: var(--acid); box-shadow: inset 0 0 0 1px var(--acid); }
+.setting-toggle { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .6rem 0 0; padding: .9rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); cursor: pointer; }
+.setting-toggle span,.setting-toggle strong,.setting-toggle small { display: block; }
+.setting-toggle strong { color: var(--paper); font-size: .82rem; }
+.setting-toggle small { margin-top: .25rem; color: var(--muted); font-size: .7rem; font-weight: 400; line-height: 1.45; }
+.setting-toggle input { width: 19px; height: 19px; flex: 0 0 auto; accent-color: var(--acid); }
+.profile-form-actions { display: flex; gap: .65rem; margin-top: .35rem; }
+.profile-form-actions button { min-height: 42px; padding: 0 .9rem; border-radius: 2px; cursor: pointer; font-size: .78rem; font-weight: 750; }
+.profile-save { border: 1px solid var(--acid); background: var(--acid); color: var(--ink); }
+.profile-clear { border: 1px solid var(--line); background: transparent; color: var(--muted); }
+.settings-status { min-height: 1.2rem; margin: 0; color: var(--acid); font-size: .75rem; }
