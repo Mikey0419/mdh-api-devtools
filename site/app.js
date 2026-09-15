@@ -298,8 +298,36 @@ const AUTH0_DOMAIN = "dev-k8fshtox4w7pm3ah.us.auth0.com";
 const AUTH0_CLIENT_ID = "QwA1u0OF6OVAjQvUs8CxusnaOTtIekq9";
 const authButton = document.querySelector("#auth-button");
 const authLabel = document.querySelector("#auth-label");
+const authGate = document.querySelector("#auth-gate");
+const appShell = document.querySelector("#app-shell");
+const authLoading = document.querySelector("#auth-loading");
+const authLoginView = document.querySelector("#auth-login-view");
+const authErrorView = document.querySelector("#auth-error-view");
+const authError = document.querySelector("#auth-error");
 let authClient;
 let signedIn = false;
+
+function showLogin() {
+  authLoading.hidden = true;
+  authErrorView.hidden = true;
+  authLoginView.hidden = false;
+  authGate.hidden = false;
+  appShell.hidden = true;
+}
+
+function showWorkspace() {
+  authGate.hidden = true;
+  appShell.hidden = false;
+}
+
+function showAuthError(message) {
+  authLoading.hidden = true;
+  authLoginView.hidden = true;
+  authError.textContent = message;
+  authErrorView.hidden = false;
+  authGate.hidden = false;
+  appShell.hidden = true;
+}
 
 async function initializeAuth() {
   try {
@@ -327,16 +355,27 @@ async function initializeAuth() {
       authLabel.textContent = user?.name || user?.email || "Sign out";
       authButton.title = "Sign out of MDH-API";
       authButton.classList.add("signed-in");
+      showWorkspace();
     } else {
       authLabel.textContent = "Sign in";
       authButton.title = "Sign in to MDH-API";
+      showLogin();
     }
     authButton.disabled = false;
   } catch (error) {
     console.error("Auth0 initialization failed:", error);
     authLabel.textContent = "Sign in unavailable";
     authButton.title = error.message;
+    showAuthError(error.message || "Authentication could not be initialized.");
   }
+}
+
+async function beginLogin(screenHint) {
+  if (!authClient) return;
+  await authClient.loginWithRedirect({
+    authorizationParams: screenHint ? { screen_hint: screenHint } : {},
+    appState: { returnTo: window.location.pathname + window.location.hash }
+  });
 }
 
 authButton.addEventListener("click", async () => {
@@ -346,9 +385,11 @@ authButton.addEventListener("click", async () => {
     await authClient.logout({ logoutParams: { returnTo: window.location.origin } });
     return;
   }
-  await authClient.loginWithRedirect({
-    appState: { returnTo: window.location.pathname + window.location.hash }
-  });
+  await beginLogin();
 });
+
+document.querySelector("#auth-login").addEventListener("click", () => beginLogin());
+document.querySelector("#auth-signup").addEventListener("click", () => beginLogin("signup"));
+document.querySelector("#auth-retry").addEventListener("click", () => window.location.assign(window.location.pathname));
 
 initializeAuth();
