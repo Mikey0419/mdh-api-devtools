@@ -304,8 +304,13 @@ const authLoading = document.querySelector("#auth-loading");
 const authLoginView = document.querySelector("#auth-login-view");
 const authErrorView = document.querySelector("#auth-error-view");
 const authError = document.querySelector("#auth-error");
+const accountControl = document.querySelector(".account-control");
+const accountName = document.querySelector("#account-name");
+const accountEmail = document.querySelector("#account-email");
+const profileDialog = document.querySelector("#profile-dialog");
 let authClient;
 let signedIn = false;
+let currentUser;
 
 function showLogin() {
   authLoading.hidden = true;
@@ -352,9 +357,12 @@ async function initializeAuth() {
     signedIn = await authClient.isAuthenticated();
     if (signedIn) {
       const user = await authClient.getUser();
-      authLabel.textContent = user?.name || user?.email || "Sign out";
-      authButton.title = "Sign out of MDH-API";
+      currentUser = user;
+      authLabel.textContent = user?.name || user?.email || "Account";
+      authButton.title = "Open account menu";
       authButton.classList.add("signed-in");
+      accountName.textContent = user?.name || user?.nickname || "MDH-API user";
+      accountEmail.textContent = user?.email || "No email available";
       showWorkspace();
     } else {
       authLabel.textContent = "Sign in";
@@ -378,14 +386,43 @@ async function beginLogin(screenHint) {
   });
 }
 
-authButton.addEventListener("click", async () => {
+authButton.addEventListener("click", () => {
+  const open = accountControl.classList.toggle("open");
+  authButton.setAttribute("aria-expanded", String(open));
+});
+
+document.querySelector("#auth-logout").addEventListener("click", async () => {
   if (!authClient) return;
-  authButton.disabled = true;
-  if (signedIn) {
-    await authClient.logout({ logoutParams: { returnTo: window.location.origin } });
-    return;
+  await authClient.logout({ logoutParams: { returnTo: window.location.origin } });
+});
+
+document.querySelector("#profile-settings").addEventListener("click", () => {
+  if (!currentUser) return;
+  document.querySelector("#profile-name").textContent = currentUser.name || currentUser.nickname || "Not provided";
+  document.querySelector("#profile-email").textContent = currentUser.email || "Not provided";
+  document.querySelector("#profile-email-status").textContent = currentUser.email_verified ? "Verified" : "Not verified";
+  document.querySelector("#profile-avatar").textContent = (currentUser.name || currentUser.email || "U").trim().charAt(0).toUpperCase();
+  accountControl.classList.remove("open");
+  authButton.setAttribute("aria-expanded", "false");
+  profileDialog.showModal();
+});
+
+document.querySelector("#profile-close").addEventListener("click", () => profileDialog.close());
+profileDialog.addEventListener("click", (event) => {
+  if (event.target === profileDialog) profileDialog.close();
+});
+document.addEventListener("click", (event) => {
+  if (!accountControl.contains(event.target)) {
+    accountControl.classList.remove("open");
+    authButton.setAttribute("aria-expanded", "false");
   }
-  await beginLogin();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !profileDialog.open) {
+    accountControl.classList.remove("open");
+    authButton.setAttribute("aria-expanded", "false");
+    authButton.focus();
+  }
 });
 
 document.querySelector("#auth-login").addEventListener("click", () => beginLogin());
