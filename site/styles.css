@@ -425,20 +425,17 @@ footer p:last-child { justify-self: end; }
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
-  padding: .28rem .48rem;
-  border: 1px solid rgba(237,244,239,.2);
-  border-radius: 3px;
-  background: var(--paper);
   line-height: 0;
 }
 .brand-image {
   display: block;
   width: 164px;
   height: auto;
+  filter: invert(.88) brightness(1.35) contrast(1.08);
 }
 .brand-image-large { width: clamp(178px,20vw,220px); }
 .brand-image-footer .brand-image { width: 145px; }
-.brand-image-link:hover,.brand-image-link:focus-visible { border-color: var(--acid); box-shadow: 0 0 0 2px rgba(71,240,174,.1); }
+.brand-image-link:hover .brand-image,.brand-image-link:focus-visible .brand-image { filter: invert(.94) brightness(1.5) contrast(1.1); }
 @media (max-width: 620px) {
   .brand-image { width: 142px; }
   .brand-image-large { width: 180px; }
