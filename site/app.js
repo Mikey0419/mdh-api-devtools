@@ -484,7 +484,17 @@ async function initializeAuth() {
     authClient = await auth0.createAuth0Client({
       domain: AUTH0_DOMAIN,
       clientId: AUTH0_CLIENT_ID,
-      authorizationParams: { redirect_uri: window.location.origin }
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        scope: "openid profile email offline_access"
+      },
+      // getTokenSilently defaults to a hidden-iframe SSO check, which Safari's
+      // Intelligent Tracking Prevention blocks (it treats Auth0's domain as a
+      // third party and won't let the iframe read its session cookie). That
+      // silently drops the access token chat and cross-device sync need on
+      // iOS/Safari. Refresh tokens avoid the iframe entirely.
+      useRefreshTokens: true,
+      cacheLocation: "localstorage"
     });
 
     const params = new URLSearchParams(window.location.search);
