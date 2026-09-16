@@ -539,7 +539,10 @@ async function initializeAuth() {
 async function beginLogin(screenHint) {
   if (!authClient) return;
   await authClient.loginWithRedirect({
-    authorizationParams: screenHint ? { screen_hint: screenHint } : {},
+    authorizationParams: {
+      prompt: "select_account",
+      ...(screenHint ? { screen_hint: screenHint } : {})
+    },
     appState: { returnTo: window.location.pathname + window.location.hash }
   });
 }
