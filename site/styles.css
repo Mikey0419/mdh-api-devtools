@@ -602,3 +602,49 @@ footer p:last-child { justify-self: end; }
   .system-metrics > div { padding: .85rem .9rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .system-metrics > div:nth-child(2n) { border-right: 0; }
 }
+
+/* ------------------------------------------------------------------- chat */
+.chat-room { max-width: 1480px; margin: auto; padding: clamp(5rem,9vw,8.5rem) clamp(1.25rem,6vw,6rem); }
+.chat-room .section-heading p { max-width: 430px; margin: 0; color: var(--muted); line-height: 1.6; }
+.chat-shell { display: grid; grid-template-columns: 1fr 260px; gap: 1rem; }
+.chat-panel, .chat-members-panel { min-width: 0; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; }
+.chat-panel > header, .chat-members-panel > header { min-height: 72px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.15rem; border-bottom: 1px solid var(--line); }
+.chat-panel header p, .chat-members-panel header p { margin: 0 0 .3rem; color: var(--acid); font: .65rem ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing: .13em; text-transform: uppercase; }
+.chat-panel header h2, .chat-members-panel header h2 { margin: 0; font-size: 1rem; }
+.chat-connection { display: inline-flex; align-items: center; gap: .55rem; color: var(--muted); font: .72rem ui-monospace,SFMono-Regular,Menlo,monospace; white-space: nowrap; }
+.chat-connection i { width: 7px; height: 7px; border-radius: 50%; background: #d68b19; flex: 0 0 auto; }
+.chat-connection.live { color: var(--acid); }
+.chat-connection.live i { background: var(--acid); box-shadow: 0 0 10px rgba(71,240,174,.65); }
+
+.chat-messages { list-style: none; margin: 0; padding: 1.15rem; min-height: 360px; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: .7rem; }
+.chat-message { max-width: 78%; padding: .55rem .8rem; background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--paper); }
+.chat-message.own { align-self: flex-end; background: rgba(71,240,174,.1); border-color: rgba(71,240,174,.35); }
+.chat-message .meta { display: flex; gap: .6rem; align-items: baseline; font: .68rem ui-monospace,SFMono-Regular,Menlo,monospace; color: var(--muted); margin-bottom: .25rem; }
+.chat-message .meta b { color: var(--acid); font-weight: 700; }
+.chat-message .text { font-size: .85rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat-message.edited .text::after { content: " (edited)"; font-size: .68rem; color: var(--muted); }
+.chat-notice { align-self: center; color: var(--muted); font-size: .72rem; }
+
+.chat-typing { min-height: 20px; margin: 0; padding: 0 1.15rem .5rem; color: var(--muted); font-size: .72rem; }
+
+.chat-composer { display: flex; gap: .6rem; flex: 0 0 auto; padding: 1rem 1.15rem; border-top: 1px solid var(--line); }
+.chat-composer input { flex: 1; min-width: 0; height: 46px; padding: 0 .8rem; background: var(--ink); border: 1px solid var(--line); color: var(--paper); }
+.chat-composer input:focus { outline: 0; border-color: var(--acid); }
+.chat-composer button { min-width: 96px; border: 0; background: var(--acid); color: var(--ink); font-weight: 800; cursor: pointer; }
+.chat-composer button:hover:not(:disabled) { background: var(--acid-2); }
+.chat-composer input:disabled, .chat-composer button:disabled { opacity: .5; cursor: not-allowed; }
+
+.chat-members { margin: 0; padding: 0; list-style: none; overflow-y: auto; }
+.chat-members li { min-height: 44px; display: flex; align-items: center; gap: .55rem; padding: .6rem 1.15rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .76rem; }
+.chat-members li::before { content: ""; width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: var(--acid); box-shadow: 0 0 8px var(--acid); }
+.chat-members li.me { color: var(--paper); font-weight: 700; }
+.chat-empty { color: #61736a !important; }
+
+@media (max-width: 900px) {
+  .chat-shell { grid-template-columns: 1fr; }
+  .chat-members-panel { max-height: 220px; }
+}
+@media (max-width: 620px) {
+  .chat-messages { min-height: 260px; }
+  .chat-message { max-width: 92%; }
+}

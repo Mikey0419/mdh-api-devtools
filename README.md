@@ -59,6 +59,30 @@ Run it locally with `netlify dev` — a plain static server will 404 on
 Note that the function only *sends* webhooks. Receiving them needs a persistent
 process; that is what the Node server below is for.
 
+#### Team chat
+`netlify/functions/chat-token.mjs`, exposed at `/api/chat-token`, mints an Ably
+token for the single shared `chat:workspace` room used by the Chat section of
+the signed-in workspace (`site/chat.js`). It requires the caller's Auth0 access
+token for the `https://api.mdh-api.com` audience — the same token
+`dashboard.js` already sends to `/api/user-data` — and uses the verified `sub`
+claim as the Ably client ID, so chat identity can't be spoofed independently
+of actually being signed in. If that Auth0 API audience isn't enabled for your
+tenant, chat fails the same way cross-device sync does; the Chat section says
+so inline rather than failing silently.
+
+Required environment variable, set in the Netlify UI:
+
+| Variable | Effect |
+| --- | --- |
+| `ABLY_API_KEY` | Ably key as `appId.keyId:keySecret`, from the Ably dashboard's API Keys tab. |
+
+The Ably and Ably Chat SDKs are vendored as plain browser builds under
+`site/vendor/` (pinned to `ably@2.28.0` and `@ably/chat@1.4.0`) rather than
+loaded from a CDN, because `@ably/chat`'s UMD build is only published with a
+`.cjs` extension — most CDNs serve that as `application/node` with
+`X-Content-Type-Options: nosniff`, which makes browsers refuse to execute it
+as a `<script src>`. Renaming the vendored copy to `.js` sidesteps that.
+
 ### Self-hosted (the Vue app plus the Node server)
 This app needs a persistent Node process for the HTTP proxy and the webhook receiver.
 

@@ -14,6 +14,9 @@
     <script src="dashboard.js" defer></script>
     <script src="system-status.js" defer></script>
     <script src="inbox.js" defer></script>
+    <script src="vendor/ably.min.js" defer></script>
+    <script src="vendor/ably-chat.js" defer></script>
+    <script src="chat.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -62,6 +65,7 @@
         <a href="#workspace">Workspace</a>
         <a href="#inbox">Inbox</a>
         <a href="#tools">Tools</a>
+        <a href="#chat">Chat</a>
         <a class="github-link" href="https://github.com/Mikey0419/mdh-api-devtools" target="_blank" rel="noreferrer">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.22c-3.23.7-3.91-1.37-3.91-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.58-.29-5.29-1.29-5.29-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18A10.95 10.95 0 0 1 12 6.13c.98 0 1.95.13 2.86.38 2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.4-2.72 5.38-5.3 5.67.42.36.79 1.06.79 2.14v3.27c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
           GitHub
@@ -288,6 +292,31 @@
           <article><span>HOOK</span><h3>Webhook Tester</h3><p>Deliver sample events server-side to any HTTPS endpoint, then inspect the exact status, headers, and body that came back.</p><a href="#workspace" data-select-tool="Webhook">Test a payload ↗</a></article>
           <article><span>INBOX</span><h3>Webhook Receiver</h3><p>Take a public URL, point a real service at it, and read every request it sends — headers, query, and body.</p><a href="#inbox">Open the inbox ↗</a></article>
           <article><span>WS</span><h3>WebSocket Client</h3><p>Open a live connection, send messages, and watch events arrive in real time.</p><a href="#workspace" data-select-tool="WebSocket">Open a socket ↗</a></article>
+        </div>
+      </section>
+
+      <section class="chat-room" id="chat" aria-labelledby="chat-title">
+        <div class="section-heading">
+          <div><p class="section-index">04 / TEAM CHAT</p><h2 id="chat-title">Talk to your team.</h2></div>
+          <p>One shared room for everyone signed in to MDH-API. Messages, presence, and typing, live.</p>
+        </div>
+        <div class="chat-shell">
+          <div class="chat-panel">
+            <header>
+              <div><p>LIVE</p><h2>#workspace</h2></div>
+              <span class="chat-connection" id="chat-connection"><i aria-hidden="true"></i> Connecting…</span>
+            </header>
+            <ol class="chat-messages" id="chat-messages" aria-live="polite"></ol>
+            <p class="chat-typing" id="chat-typing">&nbsp;</p>
+            <form class="chat-composer" id="chat-composer">
+              <input id="chat-input" autocomplete="off" maxlength="2000" placeholder="Message the team" disabled />
+              <button type="submit" disabled>Send</button>
+            </form>
+          </div>
+          <aside class="chat-members-panel">
+            <header><div><p>ONLINE</p><h2><span id="chat-online-count">0</span> here now</h2></div></header>
+            <ul class="chat-members" id="chat-members"></ul>
+          </aside>
         </div>
       </section>
     </main>
