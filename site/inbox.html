@@ -3,14 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MDH-API is a focused workspace for building HTTP requests, inspecting webhooks, and testing WebSocket connections." />
+    <meta name="description" content="Get a public URL, point a service at it, and watch what actually arrives." />
     <meta name="theme-color" content="#07100e" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2307100e'/%3E%3Cpath d='M11 9 5 16l6 7M21 9l6 7-6 7M18 6l-4 20' fill='none' stroke='%2347f0ae' stroke-width='2.8' stroke-linecap='square'/%3E%3C/svg%3E" />
-    <title>MDH-API — Developer Tools, Without the Noise</title>
+    <title>Inbox — MDH-API</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js" defer></script>
     <script src="app.js" defer></script>
     <script src="sync.js" defer></script>
+    <script src="inbox.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -115,7 +116,7 @@
       <nav aria-label="Primary navigation">
         <a href="dashboard.html">Dashboard</a>
         <a href="workspace.html">Workspace</a>
-        <a href="inbox.html">Inbox</a>
+        <a href="inbox.html" aria-current="page">Inbox</a>
         <a href="tools.html">Tools</a>
         <a href="chat.html">Chat</a>
         <a class="github-link" href="https://github.com/Mikey0419/mdh-api-devtools" target="_blank" rel="noreferrer">
@@ -146,54 +147,54 @@
     </header>
 
     <main id="main">
-      <section class="hero" id="top">
-        <div class="hero-copy">
-          <p class="eyebrow"><span></span> Independent developer workspace</p>
-          <h1>Build the request.<br /><em>See what answers.</em></h1>
-          <p class="lede">Create HTTP requests, test webhook payloads, and open WebSocket connections from one focused workspace.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="workspace.html">Open workspace <span aria-hidden="true">↘</span></a>
-            <a class="button button-ghost" href="https://github.com/Mikey0419/mdh-api-devtools" target="_blank" rel="noreferrer">View source</a>
-          </div>
-          <dl class="signal-row">
-            <div><dt>3</dt><dd>protocol tools</dd></div>
-            <div><dt>Auth0</dt><dd>secure sign-in</dd></div>
-            <div><dt>100%</dt><dd>browser based</dd></div>
-          </dl>
-        </div>
-
-        <div class="console-shell" aria-label="Example API response">
-          <div class="console-topbar"><span>GET</span><code>/api/status</code><b>200 OK</b></div>
-          <div class="line-numbers" aria-hidden="true">1<br />2<br />3<br />4<br />5<br />6<br />7<br />8<br />9</div>
-          <pre><code>{
-  <span class="key">"service"</span>: <span class="string">"MDH-API"</span>,
-  <span class="key">"status"</span>: <span class="string">"online"</span>,
-  <span class="key">"tools"</span>: [
-    <span class="string">"http"</span>,
-    <span class="string">"webhooks"</span>,
-    <span class="string">"websockets"</span>
-  ]
-}</code></pre>
-          <div class="console-status"><span><i></i> Connected</span><span>42 ms</span></div>
-        </div>
-      </section>
-
-      <section class="tools" id="tools" aria-labelledby="tools-title">
+      <section class="inbox" id="inbox" aria-labelledby="inbox-title">
         <div class="section-heading">
-          <div><p class="section-index">01 / TOOLKIT</p><h2 id="tools-title">One workspace. Send and receive.</h2></div>
+          <div><p class="section-index">02 / INBOX</p><h2 id="inbox-title">Receive a webhook</h2></div>
+          <p>Get a public URL, point a service at it, and watch what actually arrives.</p>
         </div>
-        <div class="tool-grid">
-          <article><span>HTTP</span><h3>Request Builder</h3><p>Compose methods, headers, and JSON bodies. Inspect the response without extra setup.</p><a href="workspace.html">Build a request ↗</a></article>
-          <article><span>HOOK</span><h3>Webhook Tester</h3><p>Deliver sample events server-side to any HTTPS endpoint, then inspect the exact status, headers, and body that came back.</p><a href="workspace.html?tool=Webhook">Test a payload ↗</a></article>
-          <article><span>INBOX</span><h3>Webhook Receiver</h3><p>Take a public URL, point a real service at it, and read every request it sends — headers, query, and body.</p><a href="inbox.html">Open the inbox ↗</a></article>
-          <article><span>WS</span><h3>WebSocket Client</h3><p>Open a live connection, send messages, and watch events arrive in real time.</p><a href="workspace.html?tool=WebSocket">Open a socket ↗</a></article>
+
+        <div id="inbox-idle">
+          <button class="button button-primary" type="button" id="inbox-create">Create an endpoint <span aria-hidden="true">→</span></button>
+          <p class="inbox-hint">The endpoint is live for 24 hours and keeps the last 100 requests. Anyone with the URL can post to it, so do not send real secrets through it.</p>
+        </div>
+
+        <div id="inbox-live" hidden>
+          <div class="inbox-bar">
+            <label class="sr-only" for="inbox-url">Your endpoint URL</label>
+            <input id="inbox-url" type="text" readonly spellcheck="false" />
+            <button type="button" id="inbox-copy">Copy</button>
+          </div>
+          <p class="inbox-meta">
+            <span id="inbox-pulse" aria-hidden="true"></span>
+            <span id="inbox-count">0 requests</span>
+            <span class="inbox-live-state" id="inbox-live-state">Connecting live stream…</span>
+            <span id="inbox-expiry"></span>
+            <button type="button" class="link-button" id="inbox-clear">Clear</button>
+            <button type="button" class="link-button" id="inbox-forget">Forget endpoint</button>
+          </p>
+          <p class="inbox-error" id="inbox-error" role="alert" hidden></p>
+
+          <details class="inbox-response">
+            <summary>Customise the reply this endpoint sends</summary>
+            <div class="inbox-response-grid">
+              <div><label for="inbox-status-code">Status</label><input id="inbox-status-code" type="number" min="100" max="599" value="200" /></div>
+              <div><label for="inbox-response-body">Body</label><textarea id="inbox-response-body" rows="3" spellcheck="false">{"ok":true,"received":true}</textarea></div>
+            </div>
+            <div class="inbox-response-actions">
+              <button type="button" id="inbox-save-response">Save response</button>
+              <span id="inbox-response-status"></span>
+            </div>
+          </details>
+
+          <div id="inbox-events"></div>
+          <p class="inbox-empty" id="inbox-empty">Waiting for the first request…</p>
         </div>
       </section>
     </main>
 
     <footer>
       <a class="brand-image-link brand-image-footer" href="index.html" aria-label="MDH-API home"><img class="brand-image" src="mdh-api-logo.svg" alt="MDH-API" /></a>
-      <p>Tools for the space between request and answer.</p>
+      <p>Tools for the space between request and response.</p>
       <p>© <span id="year"></span> MDH-API</p>
     </footer>
     </div>

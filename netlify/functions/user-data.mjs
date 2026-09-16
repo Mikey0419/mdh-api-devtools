@@ -5,6 +5,9 @@ const MAX_COLLECTIONS = 50;
 const MAX_HISTORY = 100;
 const MAX_NOTIFICATIONS = 50;
 
+export const THEMES = ["default", "cyan", "amber", "violet", "rose", "blue"];
+const DOB_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 function json(status, body) {
   return new Response(JSON.stringify(body), {
     status,
@@ -18,6 +21,16 @@ function freshData() {
 
 function safeText(value, limit) {
   return String(value || "").trim().slice(0, limit);
+}
+
+function safeDob(value) {
+  const text = String(value || "").trim();
+  if (!DOB_PATTERN.test(text)) return "";
+  const date = new Date(`${text}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getUTCFullYear();
+  if (year < 1900 || date.getTime() > Date.now()) return "";
+  return text;
 }
 
 export default async function handler(request) {
@@ -71,10 +84,16 @@ export default async function handler(request) {
     next.history = [];
   } else if (input.action === "saveSettings") {
     next.settings = {
+      ...current.settings,
       displayName: safeText(input.settings?.displayName, 50),
-      theme: ["default", "cyan", "amber"].includes(input.settings?.theme) ? input.settings.theme : "default",
+      theme: THEMES.includes(input.settings?.theme) ? input.settings.theme : "default",
       saveHistory: Boolean(input.settings?.saveHistory),
+      dob: safeDob(input.settings?.dob),
+      githubRepo: safeText(input.settings?.githubRepo, 200),
+      social: safeText(input.settings?.social, 200),
+      aboutMe: safeText(input.settings?.aboutMe, 500),
     };
+    if (input.settings?.profileComplete) next.settings.profileComplete = true;
   } else if (input.action === "dismissNotification") {
     next.notifications = current.notifications.map((item) => item.id === input.id ? { ...item, read: true } : item);
   } else {

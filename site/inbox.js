@@ -164,33 +164,27 @@
     );
   }
 
-  // Captured requests come from whoever called the endpoint, so they are data.
-  // Nothing here is inserted as markup without escaping, and the sender form is
-  // populated through value assignment only.
+  // Captured requests come from whoever called the endpoint, so they are
+  // data, not something to trust. Nothing here is inserted as markup — the
+  // sender lives on workspace.html now, so hand the request off via
+  // sessionStorage (workspace.js applies it as plain values on load) and
+  // navigate there.
   function loadIntoSender(event) {
-    const endpoint = document.querySelector("#endpoint");
-    const method = document.querySelector("#method");
-    const headers = document.querySelector("#headers");
-    const body = document.querySelector("#body");
-    if (!endpoint || !method || !headers || !body) return;
-
-    const webhookTab = document.querySelector('.tool-tabs button[data-tool="Webhook"]');
-    if (webhookTab) webhookTab.click();
-
-    if (![...method.options].some((option) => option.value === event.method)) {
-      method.add(new Option(event.method, event.method));
-    }
-    method.value = event.method;
-
     const forwarded = { ...event.headers };
     delete forwarded.host;
     delete forwarded.Host;
     delete forwarded["content-length"];
     delete forwarded["Content-Length"];
-    headers.value = JSON.stringify(forwarded, null, 2);
-    body.value = prettyBody(event);
 
-    document.querySelector("#workspace")?.scrollIntoView({ behavior: "smooth" });
+    sessionStorage.setItem("mdh-workspace-handoff", JSON.stringify({
+      tool: "Webhook",
+      method: event.method,
+      // No endpoint on purpose: this is the payload the inbox captured, not
+      // a destination to send it to. The user fills that in on workspace.html.
+      headers: forwarded,
+      body: prettyBody(event)
+    }));
+    window.location.href = "workspace.html";
   }
 
   function renderEvents(events) {

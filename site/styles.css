@@ -28,6 +28,7 @@ a { color: inherit; }
 nav { display: flex; align-items: center; gap: 2rem; }
 nav a { text-decoration: none; color: var(--muted); font-size: .9rem; font-weight: 650; }
 nav a:hover, nav a:focus-visible { color: var(--paper); }
+nav a[aria-current="page"] { color: var(--acid); }
 .github-link { display: flex; align-items: center; gap: .55rem; border-left: 1px solid var(--line); padding-left: 2rem; }
 .github-link svg { width: 18px; fill: currentColor; }
 .menu-button { display: none; border: 0; background: transparent; width: 44px; height: 44px; padding: 11px; }
@@ -145,6 +146,7 @@ footer p:last-child { justify-self: end; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
 .delivery-note { margin: 1rem 0 0; padding: .75rem .85rem; border-left: 2px solid #14865c; background: rgba(20, 134, 92, .07); color: #33503f; font-size: .78rem; line-height: 1.55; }
+.workspace-actions { margin-top: 1rem; }
 .delivery-note b { color: var(--ink); font-weight: 750; }
 
 .websocket-controls { margin-top: 1.4rem; padding: 1rem; border: 1px solid #b9c7bf; background: #eef5f1; }
@@ -404,20 +406,34 @@ footer p:last-child { justify-self: end; }
 /* ------------------------------------------------------------------ editable profile settings */
 :root[data-theme="cyan"] { --acid: #67e8f9; --acid-2: #b7f5ff; }
 :root[data-theme="amber"] { --acid: #ffc857; --acid-2: #ffe0a3; }
+:root[data-theme="violet"] { --acid: #b78bff; --acid-2: #d9c2ff; }
+:root[data-theme="rose"] { --acid: #ff6f9c; --acid-2: #ffb3cc; }
+:root[data-theme="blue"] { --acid: #5b8cff; --acid-2: #a9c4ff; }
 .profile-settings-form { display: grid; gap: .7rem; padding: 1.35rem 1.5rem 0; }
 .profile-settings-form label:not(.setting-toggle) { margin-top: .35rem; color: var(--muted); font-size: .72rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.profile-settings-form label small { text-transform: none; letter-spacing: 0; font-weight: 400; color: #61736a; }
 .profile-settings-form input[type="text"],
-.profile-settings-form select {
+.profile-settings-form input[type="url"],
+.profile-settings-form input[type="date"],
+.profile-settings-form select,
+.profile-settings-form textarea {
   width: 100%;
-  height: 44px;
   padding: 0 .75rem;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: #07100e;
   color: var(--paper);
+  font-family: inherit;
 }
+.profile-settings-form input[type="text"],
+.profile-settings-form input[type="url"],
+.profile-settings-form input[type="date"],
+.profile-settings-form select { height: 44px; }
+.profile-settings-form textarea { padding-top: .6rem; padding-bottom: .6rem; resize: vertical; line-height: 1.5; }
+.profile-settings-form input[type="date"] { color-scheme: dark; }
 .profile-settings-form input:focus,
-.profile-settings-form select:focus { border-color: var(--acid); box-shadow: inset 0 0 0 1px var(--acid); }
+.profile-settings-form select:focus,
+.profile-settings-form textarea:focus { border-color: var(--acid); box-shadow: inset 0 0 0 1px var(--acid); outline: 0; }
 .setting-toggle { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .6rem 0 0; padding: .9rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); cursor: pointer; }
 .setting-toggle span,.setting-toggle strong,.setting-toggle small { display: block; }
 .setting-toggle strong { color: var(--paper); font-size: .82rem; }
@@ -433,6 +449,13 @@ footer p:last-child { justify-self: end; }
 .profile-avatar { overflow: hidden; }
 .profile-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .profile-avatar span { width: 100%; height: 100%; display: grid; place-items: center; }
+.profile-avatar-actions { display: flex; align-items: center; gap: 1rem; margin: 0 1.5rem 1.25rem; }
+.profile-avatar-actions .link-button, .onboarding-avatar-row .link-button { color: var(--acid); }
+
+.onboarding-card { width: min(100%,480px); }
+.onboarding-avatar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .5rem; }
+.onboarding-avatar-row .profile-avatar { width: 56px; height: 56px; margin: 0; flex: 0 0 auto; }
+.onboarding-avatar-row .profile-avatar span { font-size: 1.2rem; color: var(--muted); }
 
 
 /* ------------------------------------------------------------------ official logo */
