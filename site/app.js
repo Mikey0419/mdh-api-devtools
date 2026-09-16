@@ -486,7 +486,14 @@ async function initializeAuth() {
       clientId: AUTH0_CLIENT_ID,
       authorizationParams: {
         redirect_uri: window.location.origin,
-        scope: "openid profile email offline_access"
+        scope: "openid profile email offline_access",
+        // Must match the audience getTokenSilently() requests below. Without
+        // it here, the refresh token gets minted for "no audience" at login
+        // and later asking it for the api.mdh-api.com audience is a mismatch
+        // that auth0-spa-js's rotating-refresh-token flow fails on Safari
+        // with login_required (auth0/auth0-spa-js#469) instead of silently
+        // refreshing.
+        audience: "https://api.mdh-api.com"
       },
       // getTokenSilently defaults to a hidden-iframe SSO check, which Safari's
       // Intelligent Tracking Prevention blocks (it treats Auth0's domain as a
