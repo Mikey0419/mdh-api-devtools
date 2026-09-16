@@ -133,11 +133,6 @@ footer p:last-child { justify-self: end; }
   .github-link { border-left: 0; padding-left: .9rem; }
   .menu-button { display: block; }
   .auth-button { width: 100%; justify-content: flex-start; margin-top: .45rem; }
-  .account-control { width: 100%; }
-  .account-dropdown { position: static; width: 100%; display: none; margin-top: .35rem; opacity: 1; visibility: visible; transform: none; box-shadow: none; }
-  .account-control.open .account-dropdown { display: block; }
-  .account-control:not(.open):hover .account-dropdown,
-  .account-control:not(.open):focus-within .account-dropdown { display: none; }
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .console-shell { max-width: 700px; width: 100%; }
   .request-lab { grid-template-columns: 1fr; }
@@ -374,6 +369,13 @@ footer p:last-child { justify-self: end; }
 }
 .account-dropdown button:hover,.account-dropdown button:focus-visible { background: rgba(71,240,174,.08); color: var(--paper); }
 #auth-logout { border-top: 1px solid var(--line); color: #ffb2a6; }
+@media (max-width: 920px) {
+  .account-control { width: 100%; }
+  .account-dropdown { position: static; width: 100%; display: none; margin-top: .35rem; opacity: 1; visibility: visible; transform: none; box-shadow: none; }
+  .account-control.open .account-dropdown { display: block; }
+  .account-control:not(.open):hover .account-dropdown,
+  .account-control:not(.open):focus-within .account-dropdown { display: none; }
+}
 .profile-dialog {
   width: min(92vw,520px);
   max-height: 90svh;
