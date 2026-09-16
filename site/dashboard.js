@@ -11,24 +11,6 @@
   const recentList = root.querySelector("#recent-history");
   const collectionList = root.querySelector("#collection-list");
   const notificationList = root.querySelector("#notification-list");
-  const saveRequest = root.querySelector("#save-current-request");
-  let token = null;
-  let data = { settings: {}, collections: [], history: [], notifications: [] };
-
-  async function api(action) {
-    if (!token) throw new Error("Cross-device sync needs the Auth0 API to be enabled.");
-    const response = await fetch("/api/user-data", {
-      method: action ? "POST" : "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(action ? { "Content-Type": "application/json" } : {}),
-      },
-      body: action ? JSON.stringify(action) : undefined,
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "Sync failed.");
-    return payload;
-  }
 
   function empty(label) {
     const item = document.createElement("li");
@@ -42,7 +24,15 @@
     catch { return item.endpoint || "No endpoint"; }
   }
 
-  function render() {
+  // The saved/recent request lives on this page, but "open" it means filling
+  // in workspace.html's form on a different page — hand it off via
+  // sessionStorage and navigate there. workspace.js picks this up on load.
+  function openInWorkspace(request) {
+    sessionStorage.setItem("mdh-workspace-handoff", JSON.stringify(request));
+    window.location.href = "workspace.html";
+  }
+
+  function render(data) {
     collectionCount.textContent = data.collections.length;
     historyCount.textContent = data.history.length;
     notificationCount.textContent = data.notifications.filter((item) => !item.read).length;
@@ -65,15 +55,10 @@
       li.querySelector("b").textContent = item.name;
       li.querySelector("span").textContent = `${item.method} · ${requestLabel(item)}`;
       li.querySelector(".collection-load").addEventListener("click", () => {
-        document.querySelector("#method").value = item.method;
-        document.querySelector("#endpoint").value = item.endpoint;
-        document.querySelector("#headers").value = JSON.stringify(item.headers || {}, null, 2);
-        document.querySelector("#body").value = item.body || "";
-        document.querySelector("#workspace").scrollIntoView({ behavior: "smooth" });
+        openInWorkspace({ tool: "HTTP", method: item.method, endpoint: item.endpoint, headers: item.headers, body: item.body });
       });
       li.querySelector(".collection-delete").addEventListener("click", async () => {
-        data = await api({ action: "deleteCollection", id: item.id });
-        render();
+        await window.MDHSync.deleteCollection(item.id);
       });
       collectionList.append(li);
     });
@@ -88,74 +73,8 @@
     });
   }
 
-  saveRequest.addEventListener("click", async () => {
-    const endpoint = document.querySelector("#endpoint").value;
-    if (!endpoint) return;
-    const name = window.prompt("Name this request", requestLabel({ endpoint }));
-    if (!name) return;
-    let headers = {};
-    try { headers = JSON.parse(document.querySelector("#headers").value || "{}"); } catch {}
-    try {
-      data = await api({
-        action: "saveCollection",
-        collection: {
-          name,
-          method: document.querySelector("#method").value,
-          endpoint,
-          headers,
-          body: document.querySelector("#body").value,
-        },
-      });
-      syncState.textContent = "Synced";
-      render();
-    } catch (error) {
-      syncState.textContent = error.message;
-    }
+  window.addEventListener("mdh:data", (event) => {
+    syncState.textContent = event.detail.status;
+    render(event.detail.data);
   });
-
-  window.addEventListener("mdh:authenticated", async (event) => {
-    token = event.detail.token;
-    if (!token) {
-      syncState.textContent = "Auth0 API setup required";
-      render();
-      return;
-    }
-    try {
-      data = await api();
-      syncState.textContent = "Synced across devices";
-      window.dispatchEvent(new CustomEvent("mdh:synced-settings", { detail: data.settings }));
-      render();
-      setInterval(async () => {
-        if (document.hidden) return;
-        try { data = await api(); render(); } catch {}
-      }, 10000);
-    } catch (error) {
-      syncState.textContent = error.message;
-      render();
-    }
-  });
-
-  window.MDHDashboard = {
-    async record(request) {
-      if (!token || !data.settings.saveHistory) return;
-      try {
-        data = await api({ action: "recordHistory", request });
-        render();
-      } catch {}
-    },
-    async saveSettings(settings) {
-      if (!token) return;
-      try {
-        data = await api({ action: "saveSettings", settings });
-        render();
-      } catch {}
-    },
-    async clearHistory() {
-      if (!token) return;
-      try {
-        data = await api({ action: "clearHistory" });
-        render();
-      } catch {}
-    },
-  };
 })();
