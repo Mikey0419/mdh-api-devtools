@@ -42,6 +42,22 @@
     return namesByClientId.get(clientId) || clientId;
   }
 
+  // Sign out navigates the whole page via Auth0's logout redirect, which
+  // just drops the connection -- Ably then takes ~15s to notice an abrupt
+  // disconnect and remove the presence entry. Leaving explicitly before that
+  // navigation starts clears it immediately for everyone else instead.
+  // Capture phase so this runs before app.js's own click handler on the same
+  // button, which is what actually starts the redirect.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (room && event.target.closest("#auth-logout")) {
+        room.presence.leave().catch(() => {});
+      }
+    },
+    true
+  );
+
   window.addEventListener("mdh:authenticated", (event) => {
     const { user, token } = event.detail;
     if (!token) {
